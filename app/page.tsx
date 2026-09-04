@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center">
@@ -7,9 +9,12 @@ export default function Home() {
         Turn assignments into a realistic plan.
       </p>
 
-      <button className="mt-6 rounded-lg bg-black px-6 py-3 text-white">
+      <Link
+      href="/assignments/new"
+      className="mt-6 rounded-lg bg-black px-6 py-3 text-white"
+      >
         Create Assignment
-      </button>
+      </Link>
     </main>
   );
 }
