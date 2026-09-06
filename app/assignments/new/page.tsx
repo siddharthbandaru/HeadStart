@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function NewAssignmentPage() {
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
@@ -81,12 +83,12 @@ export default function NewAssignmentPage() {
             </p>
           </div>
 
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-black px-6 py-3 font-medium text-white"
+          <Link
+                href="/assignments/plan" 
+                className="w-full rounded-lg bg-black px-6 py-3 font-medium text-white"
           >
             Generate Plan
-          </button>
+          </Link>
         </form>
       </div>
     </main>
