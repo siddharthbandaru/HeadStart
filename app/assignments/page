@@ -1,0 +1,95 @@
+import Link from "next/link";
+
+const assignments = [
+  {
+    id: 1,
+    title: "Research Paper",
+    dueDate: "September 15",
+    completed: 2,
+    total: 5,
+  },
+  {
+    id: 2,
+    title: "Operating Systems Project",
+    dueDate: "September 20",
+    completed: 1,
+    total: 6,
+  },
+  {
+    id: 3,
+    title: "Design Presentation",
+    dueDate: "September 25",
+    completed: 3,
+    total: 4,
+  },
+];
+
+export default function AssignmentsPage() {
+  return (
+    <main className="min-h-screen bg-gray-50 px-6 py-12">
+      <div className="mx-auto max-w-4xl">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold">
+              Assignments
+            </h1>
+
+            <p className="mt-2 text-gray-600">
+              View and manage your active assignments.
+            </p>
+          </div>
+
+          <Link
+            href="/assignments/new"
+            className="rounded-lg bg-black px-5 py-3 text-white"
+          >
+            + New Assignment
+          </Link>
+        </div>
+
+        <div className="mt-8 space-y-4">
+          {assignments.map((assignment) => {
+            const progress = Math.round(
+              (assignment.completed / assignment.total) * 100
+            );
+
+            return (
+              <Link
+                key={assignment.id}
+                href={`/assignments/${assignment.id}`}
+                className="block rounded-2xl bg-white p-6 shadow-sm"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h2 className="text-xl font-semibold">
+                      {assignment.title}
+                    </h2>
+
+                    <p className="mt-1 text-gray-600">
+                      Due {assignment.dueDate}
+                    </p>
+                  </div>
+
+                  <span className="text-sm font-medium text-gray-500">
+                    {progress}%
+                  </span>
+                </div>
+
+                <div className="mt-4 h-2 rounded-full bg-gray-200">
+                  <div
+                    className="h-2 rounded-full bg-black"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+
+                <p className="mt-3 text-sm text-gray-500">
+                  {assignment.completed} of {assignment.total} checkpoints complete
+                </p>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </main>
+  );
+}

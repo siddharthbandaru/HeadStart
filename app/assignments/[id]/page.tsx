@@ -5,33 +5,33 @@ import { useState } from "react";
 const checkpoints = [
   {
     id: 1,
-    date: "September 5",
+    date: "2026-09-05",
     title: "Find 5 scholarly sources",
-    estimatedTime: "1 hour",
+    estimatedMinutes: 60,
   },
   {
     id: 2,
-    date: "September 6",
+    date: "2026-09-06",
     title: "Read and annotate sources",
-    estimatedTime: "2 hours",
+    estimatedMinutes: 120,
   },
   {
     id: 3,
-    date: "September 8",
+    date: "2026-09-08",
     title: "Create thesis and outline",
-    estimatedTime: "1 hour",
+    estimatedMinutes: 60,
   },
   {
     id: 4,
-    date: "September 10",
+    date: "2026-09-10",
     title: "Write first draft",
-    estimatedTime: "3 hours",
+    estimatedMinutes: 180,
   },
   {
     id: 5,
-    date: "September 14",
+    date: "2026-09-14",
     title: "Final review + buffer",
-    estimatedTime: "45 minutes",
+    estimatedMinutes: 45,
   },
 ];
 
