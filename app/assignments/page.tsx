@@ -1,28 +1,17 @@
 import Link from "next/link";
 
-const assignments = [
-  {
-    id: 1,
-    title: "Research Paper",
-    dueDate: "September 15",
-    completed: 2,
-    total: 5,
-  },
-  {
-    id: 2,
-    title: "Operating Systems Project",
-    dueDate: "September 20",
-    completed: 1,
-    total: 6,
-  },
-  {
-    id: 3,
-    title: "Design Presentation",
-    dueDate: "September 25",
-    completed: 3,
-    total: 4,
-  },
-];
+import {
+  assignments,
+  checkpoints,
+  classes,
+} from "../data/headstartData";
+
+const formatDate = (date: string) => {
+  return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+  });
+};
 
 export default function AssignmentsPage() {
   return (
@@ -31,6 +20,7 @@ export default function AssignmentsPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold">Assignments</h1>
+
             <p className="mt-2 text-gray-600">
               View and manage your active assignments.
             </p>
@@ -46,24 +36,53 @@ export default function AssignmentsPage() {
 
         <div className="mt-8 space-y-4">
           {assignments.map((assignment) => {
-            const progress = Math.round(
-              (assignment.completed / assignment.total) * 100
+            const assignmentCheckpoints = checkpoints.filter(
+              (checkpoint) =>
+                checkpoint.assignmentId === assignment.id
+            );
+
+            const completedCheckpoints =
+              assignmentCheckpoints.filter(
+                (checkpoint) => checkpoint.completed
+              ).length;
+
+            const totalCheckpoints = assignmentCheckpoints.length;
+
+            const progress =
+              totalCheckpoints === 0
+                ? 0
+                : Math.round(
+                    (completedCheckpoints / totalCheckpoints) * 100
+                  );
+
+            const classInfo = classes.find(
+              (classInfo) => classInfo.id === assignment.classId
             );
 
             return (
               <Link
                 key={assignment.id}
                 href={"/assignments/" + assignment.id}
-                className="block rounded-2xl bg-white p-6 shadow-sm"
+                className="block rounded-2xl bg-white p-6 shadow-sm transition hover:shadow-md"
               >
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-4">
                   <div>
-                    <h2 className="text-xl font-semibold">
-                      {assignment.title}
-                    </h2>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="text-xl font-semibold">
+                        {assignment.title}
+                      </h2>
 
-                    <p className="mt-1 text-gray-600">
-                      Due {assignment.dueDate}
+                      {classInfo && (
+                        <span
+                          className={`rounded-full border px-2 py-1 text-xs font-medium ${classInfo.colorClasses}`}
+                        >
+                          {classInfo.name}
+                        </span>
+                      )}
+                    </div>
+
+                    <p className="mt-2 text-gray-600">
+                      Due {formatDate(assignment.dueDate)}
                     </p>
                   </div>
 
@@ -80,7 +99,7 @@ export default function AssignmentsPage() {
                 </div>
 
                 <p className="mt-3 text-sm text-gray-500">
-                  {assignment.completed} of {assignment.total} checkpoints complete
+                  {completedCheckpoints} of {totalCheckpoints} checkpoints complete
                 </p>
               </Link>
             );

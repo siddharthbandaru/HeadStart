@@ -3,67 +3,22 @@
 import Link from "next/link";
 import { useState } from "react";
 
-const tasks = [
-  {
-    id: 1,
-    assignmentId: 1,
-    assignment: "Research Paper",
-    title: "Find 5 scholarly sources",
-    date: "2026-09-05",
-    estimatedMinutes: 60,
-    completed: true,
-  },
-  {
-    id: 2,
-    assignmentId: 1,
-    assignment: "Research Paper",
-    title: "Read and annotate sources",
-    date: "2026-09-06",
-    estimatedMinutes: 120,
-    completed: false,
-  },
-  {
-    id: 3,
-    assignmentId: 1,
-    assignment: "Research Paper",
-    title: "Create thesis and outline",
-    date: "2026-09-08",
-    estimatedMinutes: 60,
-    completed: false,
-  },
-  {
-    id: 4,
-    assignmentId: 2,
-    assignment: "Operating Systems Project",
-    title: "Complete kernel setup",
-    date: "2026-09-06",
-    estimatedMinutes: 90,
-    completed: false,
-  },
-  {
-    id: 5,
-    assignmentId: 2,
-    assignment: "Operating Systems Project",
-    title: "Review project requirements",
-    date: "2026-09-04",
-    estimatedMinutes: 30,
-    completed: true,
-  },
-];
+import {
+  assignments,
+  checkpoints,
+  classes,
+} from "../data/headstartData";
 
-const getTaskStatus = (date: string) => {
+type TaskStatus = "late" | "today" | "upcoming";
+
+const getTaskStatus = (date: string): TaskStatus => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const taskDate = new Date(`${date}T00:00:00`);
 
-  if (taskDate < today) {
-    return "late";
-  }
-
-  if (taskDate.getTime() === today.getTime()) {
-    return "today";
-  }
+  if (taskDate < today) return "late";
+  if (taskDate.getTime() === today.getTime()) return "today";
 
   return "upcoming";
 };
@@ -79,13 +34,8 @@ const formatTime = (minutes: number) => {
   const hours = Math.floor(minutes / 60);
   const mins = minutes % 60;
 
-  if (hours === 0) {
-    return `${mins} min`;
-  }
-
-  if (mins === 0) {
-    return `${hours} hr`;
-  }
+  if (hours === 0) return `${mins} min`;
+  if (mins === 0) return `${hours} hr`;
 
   return `${hours} hr ${mins} min`;
 };
@@ -93,14 +43,33 @@ const formatTime = (minutes: number) => {
 export default function TodoPage() {
   const [showCompleted, setShowCompleted] = useState(false);
 
-  const incompleteTasks = tasks.filter((task) => !task.completed);
-  const completedTasks = tasks.filter((task) => task.completed);
+  const incompleteTasks = checkpoints.filter(
+    (checkpoint) => !checkpoint.completed
+  );
+
+  const completedTasks = checkpoints.filter(
+    (checkpoint) => checkpoint.completed
+  );
+
+  const statusStyles: Record<TaskStatus, string> = {
+    late: "border-red-300 bg-red-50",
+    today: "border-yellow-300 bg-yellow-50",
+    upcoming: "border-green-300 bg-green-50",
+  };
+
+  const statusLabels: Record<TaskStatus, string> = {
+    late: "Late",
+    today: "Due today",
+    upcoming: "Upcoming",
+  };
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
       <div className="mx-auto max-w-4xl">
         <div>
-          <h1 className="text-4xl font-bold">To-Do</h1>
+          <h1 className="text-4xl font-bold">
+            To-Do
+          </h1>
 
           <p className="mt-2 text-gray-600">
             Checkpoints across all your assignments.
@@ -116,7 +85,9 @@ export default function TodoPage() {
             {completedTasks.length > 0 && (
               <button
                 type="button"
-                onClick={() => setShowCompleted(!showCompleted)}
+                onClick={() =>
+                  setShowCompleted(!showCompleted)
+                }
                 className="text-sm font-medium text-gray-600 hover:text-black"
               >
                 {showCompleted
@@ -127,44 +98,60 @@ export default function TodoPage() {
           </div>
 
           <div className="mt-4 space-y-4">
-            {incompleteTasks.map((task) => {
-              const status = getTaskStatus(task.date);
+            {incompleteTasks.map((checkpoint) => {
+              const status = getTaskStatus(
+                checkpoint.date
+              );
 
-              const statusStyles = {
-                late: "border-red-300 bg-red-50",
-                today: "border-yellow-300 bg-yellow-50",
-                upcoming: "border-green-300 bg-green-50",
-              };
+              const assignment = assignments.find(
+                (assignment) =>
+                  assignment.id === checkpoint.assignmentId
+              );
 
-              const statusLabels = {
-                late: "Late",
-                today: "Due today",
-                upcoming: "Upcoming",
-              };
+              const classInfo = classes.find(
+                (classInfo) =>
+                  classInfo.id === assignment?.classId
+              );
 
               return (
                 <Link
-                  key={task.id}
-                  href={`/assignments/${task.assignmentId}`}
+                  key={checkpoint.id}
+                  href={
+                    "/assignments/" +
+                    checkpoint.assignmentId
+                  }
                   className={`block rounded-2xl border p-6 transition hover:shadow-sm ${statusStyles[status]}`}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        {formatDate(task.date)}
-                      </p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-medium text-gray-500">
+                          {formatDate(checkpoint.date)}
+                        </p>
 
-                      <h3 className="mt-1 text-xl font-semibold">
-                        {task.title}
+                        {classInfo && (
+                          <span
+                            className={`rounded-full border px-2 py-1 text-xs font-medium ${classInfo.colorClasses}`}
+                          >
+                            {classInfo.name}
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="mt-2 text-xl font-semibold">
+                        {checkpoint.title}
                       </h3>
 
                       <p className="mt-1 text-gray-600">
-                        {task.assignment}
+                        {assignment?.title ??
+                          "Unknown assignment"}
                       </p>
 
                       <p className="mt-2 text-sm text-gray-500">
                         Estimated time:{" "}
-                        {formatTime(task.estimatedMinutes)}
+                        {formatTime(
+                          checkpoint.estimatedMinutes
+                        )}
                       </p>
                     </div>
 
@@ -190,48 +177,82 @@ export default function TodoPage() {
           </div>
         </div>
 
-        {showCompleted && completedTasks.length > 0 && (
-          <div className="mt-10 border-t border-gray-200 pt-8">
-            <h2 className="text-xl font-semibold text-gray-500">
-              Completed
-            </h2>
+        {showCompleted &&
+          completedTasks.length > 0 && (
+            <div className="mt-10 border-t border-gray-200 pt-8">
+              <h2 className="text-xl font-semibold text-gray-500">
+                Completed
+              </h2>
 
-            <div className="mt-4 space-y-4">
-              {completedTasks.map((task) => (
-                <Link
-                  key={task.id}
-                  href={`/assignments/${task.assignmentId}`}
-                  className="block rounded-2xl border border-gray-200 bg-gray-100 p-6 opacity-60 transition hover:opacity-80"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-gray-400">
-                        {formatDate(task.date)}
-                      </p>
+              <div className="mt-4 space-y-4">
+                {completedTasks.map((checkpoint) => {
+                  const assignment =
+                    assignments.find(
+                      (assignment) =>
+                        assignment.id ===
+                        checkpoint.assignmentId
+                    );
 
-                      <h3 className="mt-1 text-xl font-semibold text-gray-500 line-through">
-                        {task.title}
-                      </h3>
+                  const classInfo = classes.find(
+                    (classInfo) =>
+                      classInfo.id ===
+                      assignment?.classId
+                  );
 
-                      <p className="mt-1 text-gray-500">
-                        {task.assignment}
-                      </p>
+                  return (
+                    <Link
+                      key={checkpoint.id}
+                      href={
+                        "/assignments/" +
+                        checkpoint.assignmentId
+                      }
+                      className="block rounded-2xl border border-gray-200 bg-gray-100 p-6 opacity-60 transition hover:opacity-80"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-sm font-medium text-gray-400">
+                              {formatDate(
+                                checkpoint.date
+                              )}
+                            </p>
 
-                      <p className="mt-2 text-sm text-gray-400">
-                        Estimated time:{" "}
-                        {formatTime(task.estimatedMinutes)}
-                      </p>
-                    </div>
+                            {classInfo && (
+                              <span
+                                className={`rounded-full border px-2 py-1 text-xs font-medium ${classInfo.colorClasses}`}
+                              >
+                                {classInfo.name}
+                              </span>
+                            )}
+                          </div>
 
-                    <span className="whitespace-nowrap text-sm font-medium text-gray-500">
-                      Completed
-                    </span>
-                  </div>
-                </Link>
-              ))}
+                          <h3 className="mt-2 text-xl font-semibold text-gray-500 line-through">
+                            {checkpoint.title}
+                          </h3>
+
+                          <p className="mt-1 text-gray-500">
+                            {assignment?.title ??
+                              "Unknown assignment"}
+                          </p>
+
+                          <p className="mt-2 text-sm text-gray-400">
+                            Estimated time:{" "}
+                            {formatTime(
+                              checkpoint.estimatedMinutes
+                            )}
+                          </p>
+                        </div>
+
+                        <span className="whitespace-nowrap text-sm font-medium text-gray-500">
+                          Completed
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
     </main>
   );

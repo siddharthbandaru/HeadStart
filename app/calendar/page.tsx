@@ -1,51 +1,12 @@
 import Link from "next/link";
 
-type Checkpoint = {
-  id: number;
-  assignmentId: number;
-  title: string;
-  assignment: string;
-  className: string;
-  date: number;
-};
-
-const checkpoints: Checkpoint[] = [
-  {
-    id: 1,
-    assignmentId: 1,
-    title: "Read + annotate sources",
-    assignment: "Research Paper",
-    className: "ENC 1102",
-    date: 6,
-  },
-  {
-    id: 2,
-    assignmentId: 2,
-    title: "Complete kernel setup",
-    assignment: "Operating Systems Project",
-    className: "COP 4600",
-    date: 6,
-  },
-  {
-    id: 3,
-    assignmentId: 3,
-    title: "Create presentation outline",
-    assignment: "Design Presentation",
-    className: "DIG 2121",
-    date: 10,
-  },
-];
-
-const classColors: Record<string, string> = {
-  "ENC 1102": "bg-blue-100 border-blue-400",
-  "COP 4600": "bg-purple-100 border-purple-400",
-  "DIG 2121": "bg-green-100 border-green-400",
-};
+import {
+  assignments,
+  checkpoints,
+  classes,
+} from "../data/headstartData";
 
 const daysInMonth = 30;
-
-// September 1, 2026 is a Tuesday.
-// Sunday = 0, Monday = 1, Tuesday = 2
 const firstDayOffset = 2;
 
 export default function CalendarPage() {
@@ -82,14 +43,14 @@ export default function CalendarPage() {
 
         {/* Class color key */}
         <div className="mt-6 flex flex-wrap gap-3">
-        {Object.entries(classColors).map(([className, color]) => (
+          {classes.map((classInfo) => (
             <div
-            key={className}
-            className={`rounded-lg border px-3 py-2 text-sm font-medium ${color}`}
+              key={classInfo.id}
+              className={`rounded-lg border px-3 py-2 text-sm font-medium ${classInfo.colorClasses}`}
             >
-            {className}
+              {classInfo.name}
             </div>
-        ))}
+          ))}
         </div>
 
         {/* Day headings */}
@@ -112,16 +73,20 @@ export default function CalendarPage() {
             const dayCheckpoints =
               day === null
                 ? []
-                : checkpoints.filter(
-                    (checkpoint) => checkpoint.date === day
-                  );
+                : checkpoints.filter((checkpoint) => {
+                    const checkpointDay = Number(
+                      checkpoint.date.split("-")[2]
+                    );
+
+                    return checkpointDay === day;
+                  });
 
             const isToday = day === 6;
 
             return (
               <div
                 key={index}
-                className={`min-h-40 border-b border-r border-gray-200 p-3 ${
+                className={`min-h-44 border-b border-r border-gray-200 p-3 ${
                   day === null ? "bg-gray-100" : "bg-white"
                 }`}
               >
@@ -138,27 +103,43 @@ export default function CalendarPage() {
                     </div>
 
                     <div className="mt-3 space-y-2">
-                      {dayCheckpoints.map((checkpoint) => (
-                        <Link
-                          key={checkpoint.id}
-                          href={
-                            "/assignments/" +
-                            checkpoint.assignmentId
-                          }
-                          className={`block rounded-lg border px-2 py-2 transition hover:opacity-80 ${
-                            classColors[checkpoint.className] ??
-                            "border-gray-200 bg-gray-100"
-                            }`}
-                        >
-                          <p className="text-xs font-semibold leading-tight text-gray-900">
-                            {checkpoint.title}
-                          </p>
+                      {dayCheckpoints.map((checkpoint) => {
+                        const assignment = assignments.find(
+                          (assignment) =>
+                            assignment.id === checkpoint.assignmentId
+                        );
 
-                          <p className="mt-1 truncate text-xs text-gray-500">
-                            {checkpoint.assignment}
-                          </p>
-                        </Link>
-                      ))}
+                        const classInfo = classes.find(
+                          (classInfo) =>
+                            classInfo.id === assignment?.classId
+                        );
+
+                        return (
+                          <Link
+                            key={checkpoint.id}
+                            href={
+                              "/assignments/" +
+                              checkpoint.assignmentId
+                            }
+                            className={`block rounded-lg border px-2 py-2 transition hover:opacity-80 ${
+                              classInfo?.colorClasses ??
+                              "border-gray-200 bg-gray-100"
+                            }`}
+                          >
+                            <p className="text-xs font-semibold leading-tight text-gray-900">
+                              {checkpoint.title}
+                            </p>
+
+                            <p className="mt-1 text-xs text-gray-600">
+                              {classInfo?.name ?? "No class"}
+                            </p>
+
+                            <p className="mt-1 truncate text-xs text-gray-500">
+                              {assignment?.title ?? "Unknown assignment"}
+                            </p>
+                          </Link>
+                        );
+                      })}
                     </div>
                   </>
                 )}
