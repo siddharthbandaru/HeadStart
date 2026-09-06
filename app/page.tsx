@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { useHeadstart } from "../../context/HeadstartContext";
+import { useHeadstart } from "./context/HeadstartContext";
 
 
 type TaskStatus = "late" | "today" | "upcoming";

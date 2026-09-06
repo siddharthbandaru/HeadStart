@@ -1,41 +1,30 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useHeadstart } from "../../context/HeadstartContext";
+import { generatePlan } from "../../utils/generatePlan";
 
 export default function AssignmentPlanPage() {
-  const [checkpoints, setCheckpoints] = useState([
-    {
-      id: 1,
-      date: "2026-09-05",
-      title: "Find 5 scholarly sources",
-      estimatedMinutes: 60,
-    },
-    {
-      id: 2,
-      date: "2026-09-06",
-      title: "Read and annotate sources",
-      estimatedMinutes: 120,
-    },
-    {
-      id: 3,
-      date: "2026-09-08",
-      title: "Create thesis and outline",
-      estimatedMinutes: 60,
-    },
-    {
-      id: 4,
-      date: "2026-09-10",
-      title: "Write first draft",
-      estimatedMinutes: 180,
-    },
-    {
-      id: 5,
-      date: "2026-09-14",
-      title: "Final review + buffer",
-      estimatedMinutes: 45,
-    },
-  ]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const {
+    assignments,
+    addCheckpoints,
+  } = useHeadstart();
+
+  const assignmentId = Number(
+    searchParams.get("assignmentId")
+  );
+
+  const assignment = assignments.find(
+    (assignment) => assignment.id === assignmentId
+  );
+
+  const [checkpoints, setCheckpoints] = useState(
+    () => assignment ? generatePlan(assignment) : []
+  );
 
   const updateCheckpoint = (
     id: number,
@@ -75,6 +64,42 @@ export default function AssignmentPlanPage() {
         checkpoint.estimatedMinutes > 0
     );
 
+    const handleAcceptPlan = () => {
+      if (!assignment) return;
+
+      addCheckpoints(
+        checkpoints.map((checkpoint) => ({
+          assignmentId: assignment.id,
+          title: checkpoint.title,
+          date: checkpoint.date,
+          estimatedMinutes: checkpoint.estimatedMinutes,
+          completed: false,
+        }))
+      );
+
+      router.push(
+        `/assignments/${assignment.id}`
+      );
+    };
+
+    if (!assignment) {
+      return (
+        <main className="min-h-screen bg-gray-50 px-6 py-12">
+          <div className="mx-auto max-w-3xl">
+            <div className="rounded-2xl bg-white p-8 shadow-sm">
+              <h1 className="text-2xl font-bold">
+                Assignment not found
+              </h1>
+
+              <p className="mt-2 text-gray-600">
+                Go back and create an assignment first.
+              </p>
+            </div>
+          </div>
+        </main>
+      );
+    }
+
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
       <div className="mx-auto max-w-3xl">
@@ -82,11 +107,17 @@ export default function AssignmentPlanPage() {
           <p className="text-sm font-medium text-gray-500">YOUR PLAN</p>
 
           <h1 className="mt-2 text-4xl font-bold">
-            Research Paper
+            {assignment.title}
           </h1>
 
           <p className="mt-2 text-gray-600">
-            Due September 15
+            Due{" "}
+            {new Date(
+              `${assignment.dueDate}T00:00:00`
+            ).toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+            })}
           </p>
         </div>
 
@@ -99,11 +130,11 @@ export default function AssignmentPlanPage() {
               <input
                 type="date"
                 value={checkpoint.date}
-                onChange={(e) =>
+                onChange={(event) =>
                   updateCheckpoint(
                     checkpoint.id,
                     "date",
-                    e.target.value
+                    event.target.value
                   )
                 }
                 className="rounded-lg border border-gray-300 px-3 py-2"
@@ -112,11 +143,11 @@ export default function AssignmentPlanPage() {
               <input
                 type="text"
                 value={checkpoint.title}
-                onChange={(e) =>
+                onChange={(event) =>
                   updateCheckpoint(
                     checkpoint.id,
                     "title",
-                    e.target.value
+                    event.target.value
                   )
                 }
                 className="mt-3 w-full rounded-lg border border-gray-300 px-3 py-2 text-xl font-semibold"
@@ -129,11 +160,11 @@ export default function AssignmentPlanPage() {
 
                 <select
                     value={checkpoint.estimatedMinutes}
-                    onChange={(e) =>
+                    onChange={(event) =>
                     updateCheckpoint(
                         checkpoint.id,
                         "estimatedMinutes",
-                        Number(e.target.value)
+                        Number(event.target.value)
                     )
                     }
                     className="w-full rounded-lg border border-gray-300 px-3 py-2"
@@ -176,12 +207,13 @@ export default function AssignmentPlanPage() {
 
         <div className="mt-8">
           {isPlanValid ? (
-            <Link
-                href="/assignments/1"
-                className="block w-full rounded-lg bg-black px-6 py-3 text-center font-medium text-white"
+            <button
+              type="button"
+              onClick={handleAcceptPlan}
+              className="block w-full rounded-lg bg-black px-6 py-3 text-center font-medium text-white"
             >
                 Accept Plan
-            </Link>
+            </button>
             ) : (
             <button
                 disabled

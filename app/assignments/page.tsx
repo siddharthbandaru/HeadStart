@@ -1,4 +1,4 @@
-"use clinet"
+"use client"
 import Link from "next/link";
 
 import { useHeadstart } from "../context/HeadstartContext";
