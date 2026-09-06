@@ -2,12 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-
-import {
-  assignments,
-  checkpoints,
-  classes,
-} from "../data/headstartData";
+import { useHeadstart } from "../context/HeadstartContext";
 
 type TaskStatus = "late" | "today" | "upcoming";
 
@@ -41,6 +36,13 @@ const formatTime = (minutes: number) => {
 };
 
 export default function TodoPage() {
+  const {
+    assignments,
+    checkpoints,
+    classes,
+    toggleCheckpoint,
+  } = useHeadstart();
+
   const [showCompleted, setShowCompleted] = useState(false);
 
   const incompleteTasks = checkpoints.filter(
@@ -114,52 +116,65 @@ export default function TodoPage() {
               );
 
               return (
-                <Link
+                <div
                   key={checkpoint.id}
-                  href={
-                    "/assignments/" +
-                    checkpoint.assignmentId
-                  }
-                  className={`block rounded-2xl border p-6 transition hover:shadow-sm ${statusStyles[status]}`}
+                  className={`flex items-start gap-4 rounded-2xl border p-6 transition hover:shadow-sm ${statusStyles[status]}`}
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-sm font-medium text-gray-500">
-                          {formatDate(checkpoint.date)}
+                  <button
+                    type="button"
+                    onClick={() =>
+                      toggleCheckpoint(checkpoint.id)
+                    }
+                    className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-gray-400 bg-white transition hover:border-black"
+                    aria-label={`Mark ${checkpoint.title} complete`}
+                  />
+
+                  <Link
+                    href={
+                      "/assignments/" +
+                      checkpoint.assignmentId
+                    }
+                    className="flex-1"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="text-sm font-medium text-gray-500">
+                            {formatDate(checkpoint.date)}
+                          </p>
+
+                          {classInfo && (
+                            <span
+                              className={`rounded-full border px-2 py-1 text-xs font-medium ${classInfo.colorClasses}`}
+                            >
+                              {classInfo.name}
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="mt-2 text-xl font-semibold">
+                          {checkpoint.title}
+                        </h3>
+
+                        <p className="mt-1 text-gray-600">
+                          {assignment?.title ??
+                            "Unknown assignment"}
                         </p>
 
-                        {classInfo && (
-                          <span
-                            className={`rounded-full border px-2 py-1 text-xs font-medium ${classInfo.colorClasses}`}
-                          >
-                            {classInfo.name}
-                          </span>
-                        )}
+                        <p className="mt-2 text-sm text-gray-500">
+                          Estimated time:{" "}
+                          {formatTime(
+                            checkpoint.estimatedMinutes
+                          )}
+                        </p>
                       </div>
 
-                      <h3 className="mt-2 text-xl font-semibold">
-                        {checkpoint.title}
-                      </h3>
-
-                      <p className="mt-1 text-gray-600">
-                        {assignment?.title ??
-                          "Unknown assignment"}
-                      </p>
-
-                      <p className="mt-2 text-sm text-gray-500">
-                        Estimated time:{" "}
-                        {formatTime(
-                          checkpoint.estimatedMinutes
-                        )}
-                      </p>
+                      <span className="whitespace-nowrap text-sm font-medium text-gray-600">
+                        {statusLabels[status]}
+                      </span>
                     </div>
-
-                    <span className="whitespace-nowrap text-sm font-medium text-gray-600">
-                      {statusLabels[status]}
-                    </span>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
               );
             })}
 
@@ -200,54 +215,69 @@ export default function TodoPage() {
                   );
 
                   return (
-                    <Link
+                    <div
                       key={checkpoint.id}
-                      href={
-                        "/assignments/" +
-                        checkpoint.assignmentId
-                      }
-                      className="block rounded-2xl border border-gray-200 bg-gray-100 p-6 opacity-60 transition hover:opacity-80"
+                      className="flex items-start gap-4 rounded-2xl border border-gray-200 bg-gray-100 p-6 opacity-60 transition hover:opacity-80"
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <p className="text-sm font-medium text-gray-400">
-                              {formatDate(
-                                checkpoint.date
+                      <button
+                        type="button"
+                        onClick={() =>
+                          toggleCheckpoint(checkpoint.id)
+                        }
+                        className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-black bg-black text-white"
+                        aria-label={`Mark ${checkpoint.title} incomplete`}
+                      >
+                        ✓
+                      </button>
+
+                      <Link
+                        href={
+                          "/assignments/" +
+                          checkpoint.assignmentId
+                        }
+                        className="flex-1"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <p className="text-sm font-medium text-gray-400">
+                                {formatDate(
+                                  checkpoint.date
+                                )}
+                              </p>
+
+                              {classInfo && (
+                                <span
+                                  className={`rounded-full border px-2 py-1 text-xs font-medium ${classInfo.colorClasses}`}
+                                >
+                                  {classInfo.name}
+                                </span>
                               )}
+                            </div>
+
+                            <h3 className="mt-2 text-xl font-semibold text-gray-500 line-through">
+                              {checkpoint.title}
+                            </h3>
+
+                            <p className="mt-1 text-gray-500">
+                              {assignment?.title ??
+                                "Unknown assignment"}
                             </p>
 
-                            {classInfo && (
-                              <span
-                                className={`rounded-full border px-2 py-1 text-xs font-medium ${classInfo.colorClasses}`}
-                              >
-                                {classInfo.name}
-                              </span>
-                            )}
+                            <p className="mt-2 text-sm text-gray-400">
+                              Estimated time:{" "}
+                              {formatTime(
+                                checkpoint.estimatedMinutes
+                              )}
+                            </p>
                           </div>
 
-                          <h3 className="mt-2 text-xl font-semibold text-gray-500 line-through">
-                            {checkpoint.title}
-                          </h3>
-
-                          <p className="mt-1 text-gray-500">
-                            {assignment?.title ??
-                              "Unknown assignment"}
-                          </p>
-
-                          <p className="mt-2 text-sm text-gray-400">
-                            Estimated time:{" "}
-                            {formatTime(
-                              checkpoint.estimatedMinutes
-                            )}
-                          </p>
+                          <span className="whitespace-nowrap text-sm font-medium text-gray-500">
+                            Completed
+                          </span>
                         </div>
-
-                        <span className="whitespace-nowrap text-sm font-medium text-gray-500">
-                          Completed
-                        </span>
-                      </div>
-                    </Link>
+                      </Link>
+                    </div>
                   );
                 })}
               </div>

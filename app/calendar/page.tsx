@@ -1,15 +1,18 @@
+"use client"
 import Link from "next/link";
+import { useHeadstart } from "../context/HeadstartContext";
 
-import {
-  assignments,
-  checkpoints,
-  classes,
-} from "../data/headstartData";
 
 const daysInMonth = 30;
 const firstDayOffset = 2;
 
 export default function CalendarPage() {
+  const {
+    assignments,
+    checkpoints,
+    classes,
+  } = useHeadstart();
+
   const calendarCells = [
     ...Array(firstDayOffset).fill(null),
     ...Array.from({ length: daysInMonth }, (_, index) => index + 1),

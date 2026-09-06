@@ -1,10 +1,9 @@
+"use client";
+
 import Link from "next/link";
 
-import {
-  assignments,
-  checkpoints,
-  classes,
-} from "./data/headstartData";
+import { useHeadstart } from "../../context/HeadstartContext";
+
 
 type TaskStatus = "late" | "today" | "upcoming";
 
@@ -38,6 +37,12 @@ const getTaskStatus = (date: string): TaskStatus => {
 };
 
 export default function Home() {
+  const {
+      assignments,
+      checkpoints,
+      classes,
+      } = useHeadstart();
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 

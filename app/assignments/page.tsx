@@ -1,10 +1,8 @@
+"use clinet"
 import Link from "next/link";
 
-import {
-  assignments,
-  checkpoints,
-  classes,
-} from "../data/headstartData";
+import { useHeadstart } from "../context/HeadstartContext";
+
 
 const formatDate = (date: string) => {
   return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
@@ -14,6 +12,12 @@ const formatDate = (date: string) => {
 };
 
 export default function AssignmentsPage() {
+  const {
+    assignments,
+    checkpoints,
+    classes,
+  } = useHeadstart();
+
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
       <div className="mx-auto max-w-4xl">

@@ -2,13 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
-
-import {
-  assignments,
-  checkpoints,
-  classes,
-} from "../../data/headstartData";
+import { useHeadstart } from "../../context/HeadstartContext";
 
 const formatTime = (minutes: number) => {
   const hours = Math.floor(minutes / 60);
@@ -32,6 +26,13 @@ export default function AssignmentPage() {
 
   const assignmentId = Number(params.id);
 
+  const {
+    assignments,
+    checkpoints,
+    classes,
+    toggleCheckpoint,
+    } = useHeadstart();
+
   const assignment = assignments.find(
     (assignment) => assignment.id === assignmentId
   );
@@ -44,28 +45,18 @@ export default function AssignmentPage() {
     (classInfo) => classInfo.id === assignment?.classId
   );
 
-  const [completed, setCompleted] = useState<number[]>(
-    assignmentCheckpoints
-      .filter((checkpoint) => checkpoint.completed)
-      .map((checkpoint) => checkpoint.id)
-  );
 
-  const toggleCheckpoint = (id: number) => {
-    if (completed.includes(id)) {
-      setCompleted(
-        completed.filter((checkpointId) => checkpointId !== id)
-      );
-    } else {
-      setCompleted([...completed, id]);
-    }
-  };
+  const completedCount =
+    assignmentCheckpoints.filter(
+        (checkpoint) => checkpoint.completed
+    ).length;
 
-  const progress =
-    assignmentCheckpoints.length === 0
-      ? 0
-      : Math.round(
-          (completed.length / assignmentCheckpoints.length) * 100
-        );
+    const progress =
+        assignmentCheckpoints.length === 0
+            ? 0
+            : Math.round(
+                (completedCount / assignmentCheckpoints.length) * 100
+            );
 
   if (!assignment) {
     return (
@@ -137,7 +128,7 @@ export default function AssignmentPage() {
           </div>
 
           <p className="mt-3 text-sm text-gray-500">
-            {completed.length} of {assignmentCheckpoints.length} checkpoints complete
+            {completedCount} of {assignmentCheckpoints.length} checkpoints complete
           </p>
         </div>
 
@@ -148,9 +139,7 @@ export default function AssignmentPage() {
 
           <div className="mt-4 space-y-4">
             {assignmentCheckpoints.map((checkpoint) => {
-              const isCompleted = completed.includes(
-                checkpoint.id
-              );
+              const isCompleted = checkpoint.completed;
 
               return (
                 <div
