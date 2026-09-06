@@ -1,8 +1,63 @@
+"use client";
+
+import { useState } from "react";
+
+const checkpoints = [
+  {
+    id: 1,
+    date: "September 5",
+    title: "Find 5 scholarly sources",
+    estimatedTime: "1 hour",
+  },
+  {
+    id: 2,
+    date: "September 6",
+    title: "Read and annotate sources",
+    estimatedTime: "2 hours",
+  },
+  {
+    id: 3,
+    date: "September 8",
+    title: "Create thesis and outline",
+    estimatedTime: "1 hour",
+  },
+  {
+    id: 4,
+    date: "September 10",
+    title: "Write first draft",
+    estimatedTime: "3 hours",
+  },
+  {
+    id: 5,
+    date: "September 14",
+    title: "Final review + buffer",
+    estimatedTime: "45 minutes",
+  },
+];
+
 export default function ActiveAssignmentPage() {
+  const [completed, setCompleted] = useState<number[]>([]);
+
+  const toggleCheckpoint = (id: number) => {
+    if (completed.includes(id)) {
+      setCompleted(completed.filter((checkpointId) => checkpointId !== id));
+    } else {
+      setCompleted([...completed, id]);
+    }
+  };
+
+  const progress = Math.round(
+    (completed.length / checkpoints.length) * 100
+  );
+
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-4xl font-bold">
+        <p className="text-sm font-medium text-gray-500">
+          ACTIVE ASSIGNMENT
+        </p>
+
+        <h1 className="mt-2 text-4xl font-bold">
           Research Paper
         </h1>
 
@@ -10,14 +65,59 @@ export default function ActiveAssignmentPage() {
           Due September 15
         </p>
 
-        <div className="mt-8 rounded-2xl bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-semibold">
-            Active Plan
-          </h2>
+        <div className="mt-6">
+          <div className="mb-2 flex justify-between text-sm text-gray-600">
+            <span>
+              {completed.length} of {checkpoints.length} checkpoints complete
+            </span>
 
-          <p className="mt-2 text-gray-600">
-            Your checkpoints will go here.
-          </p>
+            <span>{progress}%</span>
+          </div>
+
+          <div className="h-3 w-full rounded-full bg-gray-200">
+            <div
+              className="h-3 rounded-full bg-black"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="mt-8 space-y-4">
+          {checkpoints.map((checkpoint) => {
+            const isCompleted = completed.includes(checkpoint.id);
+
+            return (
+              <div
+                key={checkpoint.id}
+                className="flex items-start gap-4 rounded-2xl bg-white p-6 shadow-sm"
+              >
+                <input
+                  type="checkbox"
+                  checked={isCompleted}
+                  onChange={() => toggleCheckpoint(checkpoint.id)}
+                  className="mt-1 h-5 w-5"
+                />
+
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    {checkpoint.date}
+                  </p>
+
+                  <h2
+                    className={`mt-1 text-xl font-semibold ${
+                      isCompleted ? "text-gray-400 line-through" : ""
+                    }`}
+                  >
+                    {checkpoint.title}
+                  </h2>
+
+                  <p className="mt-1 text-gray-600">
+                    Estimated time: {checkpoint.estimatedTime}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </main>
