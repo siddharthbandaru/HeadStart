@@ -1,16 +1,45 @@
-const formatTime = (minutes: number) => {
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
+import Link from "next/link";
 
-  if (hours === 0) return `${mins} min`;
-  if (mins === 0) return `${hours} hr`;
+export default function Navbar() {
+  return (
+    <nav className="border-b border-gray-200 bg-white">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <Link href="/" className="text-2xl font-bold">
+          Headstart
+        </Link>
 
-  return `${hours} hr ${mins} min`;
-};
+        <div className="flex items-center gap-6">
+          <Link href="/" className="text-gray-600 hover:text-black">
+            Dashboard
+          </Link>
 
-const formatDate = (date: string) => {
-  return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-  });
-};
+          <Link
+            href="/assignments"
+            className="text-gray-600 hover:text-black"
+          >
+            Assignments
+          </Link>
+
+
+          <Link href="/todo" className="text-gray-600 hover:text-black">
+            To-Do
+          </Link>
+
+          <Link
+            href="/calendar"
+            className="text-gray-600 hover:text-black"
+          >
+            Calendar
+          </Link>
+
+          <Link
+            href="/assignments/new"
+            className="rounded-lg bg-black px-4 py-2 text-white"
+          >
+            + New Assignment
+          </Link>
+        </div>
+      </div>
+    </nav>
+  );
+}

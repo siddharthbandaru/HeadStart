@@ -30,10 +30,7 @@ export default function AssignmentsPage() {
       <div className="mx-auto max-w-4xl">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold">
-              Assignments
-            </h1>
-
+            <h1 className="text-4xl font-bold">Assignments</h1>
             <p className="mt-2 text-gray-600">
               View and manage your active assignments.
             </p>
@@ -56,7 +53,7 @@ export default function AssignmentsPage() {
             return (
               <Link
                 key={assignment.id}
-                href={`/assignments/${assignment.id}`}
+                href={"/assignments/" + assignment.id}
                 className="block rounded-2xl bg-white p-6 shadow-sm"
               >
                 <div className="flex items-start justify-between">
@@ -78,7 +75,7 @@ export default function AssignmentsPage() {
                 <div className="mt-4 h-2 rounded-full bg-gray-200">
                   <div
                     className="h-2 rounded-full bg-black"
-                    style={{ width: `${progress}%` }}
+                    style={{ width: progress + "%" }}
                   />
                 </div>
 
