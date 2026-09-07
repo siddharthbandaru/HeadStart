@@ -3,6 +3,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useState,
   ReactNode,
 } from "react";
@@ -17,27 +18,48 @@ import {
 } from "../data/headstartData";
 
 type NewAssignment = Omit<Assignment, "id">;
-
 type NewCheckpoint = Omit<Checkpoint, "id">;
-
 type NewClass = Omit<ClassInfo, "id">;
 
 type HeadstartContextType = {
   assignments: Assignment[];
   classes: ClassInfo[];
   checkpoints: Checkpoint[];
-  addAssignment: (assignment: NewAssignment) => Assignment;
-  addCheckpoints: (checkpoints: NewCheckpoint[]) => void;
-  addClass: (classInfo: NewClass) => ClassInfo;
-  toggleCheckpoint: (id: number) => void;
-  updateClass: (id: number, name: string) => void;
-  deleteClass: (id: number) => void;
+
+  addAssignment: (
+    assignment: NewAssignment
+  ) => Assignment;
+
+  deleteAssignment: (
+    id: number
+  ) => void;
+
+  addClass: (
+    classInfo: NewClass
+  ) => ClassInfo;
+
+  updateClass: (
+    id: number,
+    name: string
+  ) => void;
+
+  deleteClass: (
+    id: number
+  ) => void;
+
+  addCheckpoints: (
+    checkpoints: NewCheckpoint[]
+  ) => void;
+
+  toggleCheckpoint: (
+    id: number
+  ) => void;
 };
 
-
-const HeadstartContext = createContext<
-  HeadstartContextType | undefined
->(undefined);
+const HeadstartContext =
+  createContext<HeadstartContextType | undefined>(
+    undefined
+  );
 
 export function HeadstartProvider({
   children,
@@ -47,59 +69,123 @@ export function HeadstartProvider({
   const [assignments, setAssignments] =
     useState<Assignment[]>(initialAssignments);
 
+  const [classes, setClasses] =
+    useState<ClassInfo[]>(initialClasses);
+
   const [checkpoints, setCheckpoints] =
     useState<Checkpoint[]>(initialCheckpoints);
 
-  const [classes, setClasses] =
-    useState<ClassInfo[]>(initialClasses);
+  const [hasLoaded, setHasLoaded] =
+    useState(false);
+
+
+  useEffect(() => {
+    const savedAssignments =
+      localStorage.getItem(
+        "headstart-assignments"
+      );
+
+    const savedClasses =
+      localStorage.getItem(
+        "headstart-classes"
+      );
+
+    const savedCheckpoints =
+      localStorage.getItem(
+        "headstart-checkpoints"
+      );
+
+    if (savedAssignments) {
+      setAssignments(
+        JSON.parse(savedAssignments)
+      );
+    }
+
+    if (savedClasses) {
+      setClasses(
+        JSON.parse(savedClasses)
+      );
+    }
+
+    if (savedCheckpoints) {
+      setCheckpoints(
+        JSON.parse(savedCheckpoints)
+      );
+    }
+
+    setHasLoaded(true);
+  }, []);
+
+
+  useEffect(() => {
+    if (!hasLoaded) return;
+
+    localStorage.setItem(
+      "headstart-assignments",
+      JSON.stringify(assignments)
+    );
+  }, [assignments, hasLoaded]);
+
+
+  useEffect(() => {
+    if (!hasLoaded) return;
+
+    localStorage.setItem(
+      "headstart-classes",
+      JSON.stringify(classes)
+    );
+  }, [classes, hasLoaded]);
+
+
+  useEffect(() => {
+    if (!hasLoaded) return;
+
+    localStorage.setItem(
+      "headstart-checkpoints",
+      JSON.stringify(checkpoints)
+    );
+  }, [checkpoints, hasLoaded]);
 
   const addAssignment = (
     assignment: NewAssignment
   ): Assignment => {
     const newAssignment: Assignment = {
       ...assignment,
+
       id:
-      assignments.length === 0
-      ? 1
-      : Math.max(
-        ...assignments.map((assignment) => assignment.id)
-      ) +1
+        assignments.length === 0
+          ? 1
+          : Math.max(
+              ...assignments.map(
+                (assignment) =>
+                  assignment.id
+              )
+            ) + 1,
     };
-    
-    setAssignments((currentAssignments) => [
-      ...currentAssignments,
-      newAssignment,
-    ]);
+
+    setAssignments(
+      (currentAssignments) => [
+        ...currentAssignments,
+        newAssignment,
+      ]
+    );
 
     return newAssignment;
   };
 
-  const addCheckpoints = (
-    newCheckpoints: NewCheckpoint[]
-  ) => {
-    setCheckpoints((currentCheckpoints) => {
-      const startingId =
-        currentCheckpoints.length === 0
-          ? 1
-          : Math.max(
-              ...currentCheckpoints.map(
-                (checkpoint) => checkpoint.id
-              )
-            ) + 1;
+  const deleteAssignment = (id: number) => {
+    setAssignments((currentAssignments) =>
+      currentAssignments.filter(
+        (assignment) => assignment.id !== id
+      )
+    );
 
-      const checkpointsWithIds =
-        newCheckpoints.map(
-          (checkpoint, index) => ({
-            ...checkpoint,
-            id: startingId + index,
-          })
-        );
-
-      return [
-        ...currentCheckpoints,
-        ...checkpointsWithIds,
-      ];
-    });
+    setCheckpoints((currentCheckpoints) =>
+      currentCheckpoints.filter(
+        (checkpoint) =>
+          checkpoint.assignmentId !== id
+      )
+    );
   };
 
   const addClass = (
@@ -107,55 +193,104 @@ export function HeadstartProvider({
   ): ClassInfo => {
     const newClass: ClassInfo = {
       ...classInfo,
+
       id:
         classes.length === 0
           ? 1
           : Math.max(
               ...classes.map(
-                (classInfo) => classInfo.id
+                (classInfo) =>
+                  classInfo.id
               )
             ) + 1,
     };
 
-    setClasses((currentClasses) => [
-      ...currentClasses,
-      newClass,
-    ]);
+    setClasses(
+      (currentClasses) => [
+        ...currentClasses,
+        newClass,
+      ]
+    );
 
     return newClass;
   };
 
-  const toggleCheckpoint = (id: number) => {
-    setCheckpoints((currentCheckpoints) =>
-      currentCheckpoints.map((checkpoint) =>
-        checkpoint.id === id
-          ? {
+  const updateClass = (
+    id: number,
+    name: string
+  ) => {
+    setClasses(
+      (currentClasses) =>
+        currentClasses.map(
+          (classInfo) =>
+            classInfo.id === id
+              ? {
+                  ...classInfo,
+                  name,
+                }
+              : classInfo
+        )
+    );
+  };
+
+  const deleteClass = (
+    id: number
+  ) => {
+    setClasses(
+      (currentClasses) =>
+        currentClasses.filter(
+          (classInfo) =>
+            classInfo.id !== id
+        )
+    );
+  };
+
+  const addCheckpoints = (
+    newCheckpoints: NewCheckpoint[]
+  ) => {
+    setCheckpoints(
+      (currentCheckpoints) => {
+        const startingId =
+          currentCheckpoints.length === 0
+            ? 1
+            : Math.max(
+                ...currentCheckpoints.map(
+                  (checkpoint) =>
+                    checkpoint.id
+                )
+              ) + 1;
+
+        const checkpointsWithIds =
+          newCheckpoints.map(
+            (checkpoint, index) => ({
               ...checkpoint,
-              completed: !checkpoint.completed,
-            }
-          : checkpoint
-      )
+              id: startingId + index,
+            })
+          );
+
+        return [
+          ...currentCheckpoints,
+          ...checkpointsWithIds,
+        ];
+      }
     );
   };
 
-  const updateClass = (id: number, name: string) => {
-    setClasses((currentClasses) =>
-      currentClasses.map((classInfo) =>
-        classInfo.id === id
-          ? {
-              ...classInfo,
-              name,
-            }
-          : classInfo
-      )
-    );
-  };
-
-  const deleteClass = (id: number) => {
-    setClasses((currentClasses) =>
-      currentClasses.filter(
-        (classInfo) => classInfo.id !== id
-      )
+  const toggleCheckpoint = (
+    id: number
+  ) => {
+    setCheckpoints(
+      (currentCheckpoints) =>
+        currentCheckpoints.map(
+          (checkpoint) =>
+            checkpoint.id === id
+              ? {
+                  ...checkpoint,
+                  completed:
+                    !checkpoint.completed,
+                }
+              : checkpoint
+        )
     );
   };
 
@@ -166,11 +301,12 @@ export function HeadstartProvider({
         classes,
         checkpoints,
         addAssignment,
-        addCheckpoints,
+        deleteAssignment,
         addClass,
-        toggleCheckpoint,
         updateClass,
         deleteClass,
+        addCheckpoints,
+        toggleCheckpoint,
       }}
     >
       {children}
@@ -179,7 +315,8 @@ export function HeadstartProvider({
 }
 
 export function useHeadstart() {
-  const context = useContext(HeadstartContext);
+  const context =
+    useContext(HeadstartContext);
 
   if (!context) {
     throw new Error(

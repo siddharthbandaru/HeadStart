@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import {
+  useParams,
+  useRouter,
+} from "next/navigation";
 import { useHeadstart } from "../../context/HeadstartContext";
 
 const formatTime = (minutes: number) => {
@@ -15,7 +18,9 @@ const formatTime = (minutes: number) => {
 };
 
 const formatDate = (date: string) => {
-  return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
+  return new Date(
+    `${date}T00:00:00`
+  ).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
   });
@@ -23,6 +28,7 @@ const formatDate = (date: string) => {
 
 export default function AssignmentPage() {
   const params = useParams();
+  const router = useRouter();
 
   const assignmentId = Number(params.id);
 
@@ -31,32 +37,35 @@ export default function AssignmentPage() {
     checkpoints,
     classes,
     toggleCheckpoint,
-    } = useHeadstart();
+    deleteAssignment,
+  } = useHeadstart();
 
   const assignment = assignments.find(
-    (assignment) => assignment.id === assignmentId
+    (assignment) =>
+      assignment.id === assignmentId
   );
 
-  const assignmentCheckpoints = checkpoints.filter(
-    (checkpoint) => checkpoint.assignmentId === assignmentId
-  );
-
-  const classInfo = classes.find(
-    (classInfo) => classInfo.id === assignment?.classId
-  );
-
+  const assignmentCheckpoints =
+    checkpoints.filter(
+      (checkpoint) =>
+        checkpoint.assignmentId ===
+        assignmentId
+    );
 
   const completedCount =
     assignmentCheckpoints.filter(
-        (checkpoint) => checkpoint.completed
+      (checkpoint) =>
+        checkpoint.completed
     ).length;
 
-    const progress =
-        assignmentCheckpoints.length === 0
-            ? 0
-            : Math.round(
-                (completedCount / assignmentCheckpoints.length) * 100
-            );
+  const progress =
+    assignmentCheckpoints.length === 0
+      ? 0
+      : Math.round(
+          (completedCount /
+            assignmentCheckpoints.length) *
+            100
+        );
 
   if (!assignment) {
     return (
@@ -78,6 +87,23 @@ export default function AssignmentPage() {
       </main>
     );
   }
+
+  const classInfo = classes.find(
+    (classInfo) =>
+      classInfo.id === assignment.classId
+  );
+
+  const handleDeleteAssignment = () => {
+    const confirmed = window.confirm(
+      `Delete "${assignment.title}"? This will also delete all of its checkpoints.`
+    );
+
+    if (!confirmed) return;
+
+    deleteAssignment(assignment.id);
+
+    router.push("/assignments");
+  };
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
@@ -111,7 +137,10 @@ export default function AssignmentPage() {
               </div>
 
               <p className="mt-3 text-gray-600">
-                Due {formatDate(assignment.dueDate)}
+                Due{" "}
+                {formatDate(
+                  assignment.dueDate
+                )}
               </p>
             </div>
 
@@ -123,12 +152,16 @@ export default function AssignmentPage() {
           <div className="mt-6 h-3 rounded-full bg-gray-200">
             <div
               className="h-3 rounded-full bg-black transition-all"
-              style={{ width: progress + "%" }}
+              style={{
+                width: progress + "%",
+              }}
             />
           </div>
 
           <p className="mt-3 text-sm text-gray-500">
-            {completedCount} of {assignmentCheckpoints.length} checkpoints complete
+            {completedCount} of{" "}
+            {assignmentCheckpoints.length}{" "}
+            checkpoints complete
           </p>
         </div>
 
@@ -138,71 +171,89 @@ export default function AssignmentPage() {
           </h2>
 
           <div className="mt-4 space-y-4">
-            {assignmentCheckpoints.map((checkpoint) => {
-              const isCompleted = checkpoint.completed;
+            {assignmentCheckpoints.map(
+              (checkpoint) => {
+                const isCompleted =
+                  checkpoint.completed;
 
-              return (
-                <div
-                  key={checkpoint.id}
-                  className={`rounded-2xl border p-6 transition ${
-                    isCompleted
-                      ? "border-gray-200 bg-gray-100 opacity-60"
-                      : "border-gray-200 bg-white"
-                  }`}
-                >
-                  <div className="flex items-start gap-4">
-                    <button
-                      type="button"
-                      onClick={() =>
-                        toggleCheckpoint(checkpoint.id)
-                      }
-                      className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
-                        isCompleted
-                          ? "border-black bg-black text-white"
-                          : "border-gray-300 bg-white"
-                      }`}
-                    >
-                      {isCompleted && (
-                        <span className="text-xs">
-                          ✓
-                        </span>
-                      )}
-                    </button>
-
-                    <div className="flex-1">
-                      <h3
-                        className={`text-lg font-semibold ${
+                return (
+                  <div
+                    key={checkpoint.id}
+                    className={`rounded-2xl border p-6 transition ${
+                      isCompleted
+                        ? "border-gray-200 bg-gray-100 opacity-60"
+                        : "border-gray-200 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          toggleCheckpoint(
+                            checkpoint.id
+                          )
+                        }
+                        className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
                           isCompleted
-                            ? "text-gray-500 line-through"
-                            : ""
+                            ? "border-black bg-black text-white"
+                            : "border-gray-300 bg-white"
                         }`}
                       >
-                        {checkpoint.title}
-                      </h3>
+                        {isCompleted && (
+                          <span className="text-xs">
+                            ✓
+                          </span>
+                        )}
+                      </button>
 
-                      <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
-                        <span>
-                          {formatDate(checkpoint.date)}
-                        </span>
+                      <div className="flex-1">
+                        <h3
+                          className={`text-lg font-semibold ${
+                            isCompleted
+                              ? "text-gray-500 line-through"
+                              : ""
+                          }`}
+                        >
+                          {checkpoint.title}
+                        </h3>
 
-                        <span>
-                          {formatTime(
-                            checkpoint.estimatedMinutes
-                          )}
-                        </span>
+                        <div className="mt-2 flex flex-wrap gap-4 text-sm text-gray-500">
+                          <span>
+                            {formatDate(
+                              checkpoint.date
+                            )}
+                          </span>
+
+                          <span>
+                            {formatTime(
+                              checkpoint.estimatedMinutes
+                            )}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              }
+            )}
 
-            {assignmentCheckpoints.length === 0 && (
+            {assignmentCheckpoints.length ===
+              0 && (
               <div className="rounded-2xl border border-gray-200 bg-white p-6 text-gray-500">
                 No checkpoints yet.
               </div>
             )}
           </div>
+        </div>
+
+        <div className="mt-10 border-t border-gray-200 pt-6">
+          <button
+            type="button"
+            onClick={handleDeleteAssignment}
+            className="text-sm font-medium text-red-600 hover:text-red-700"
+          >
+            Delete Assignment
+          </button>
         </div>
       </div>
     </main>
