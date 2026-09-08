@@ -15,6 +15,7 @@ export type PlannerTask = {
   dependencies: string[];
   scheduledStart?: string;
   scheduledEnd?: string;
+  overflow?: boolean;
 };
 
 export type GeneratedPlan = {
