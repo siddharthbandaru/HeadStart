@@ -95,28 +95,32 @@ export function generatePlan(input: AssignmentInput): GeneratedPlan {
 
   let dayOffset = 0;
 
-  for (const task of tasks) {
-    const idealTaskDays = Math.ceil(
-      task.estimatedMinutes / dailyAvailableMinutes
-    );
-    const weightedTaskDays = Math.max(
-      1,
-      Math.round(task.weight * workDays)
-    );
-    const taskDays = Math.max(idealTaskDays, weightedTaskDays);
+for (const task of tasks) {
+  const taskDays = Math.ceil(
+    task.estimatedMinutes / dailyAvailableMinutes
+  );
 
-    const taskStart = new Date(start.getTime() + dayOffset * DAY_MS);
-    const taskEnd = new Date(
-      start.getTime() +
-        Math.min(dayOffset + taskDays - 1, workDays - 1) * DAY_MS
-    );
-
-    task.scheduledStart = toDateOnly(taskStart);
-    task.scheduledEnd = toDateOnly(taskEnd);
-
-    dayOffset += taskDays;
-    dayOffset = Math.min(dayOffset, workDays - 1);
+  // Not enough days left for this task
+  if (dayOffset + taskDays > workDays) {
+    task.overflow = true;
+    continue;
   }
+
+  const taskStart = new Date(
+    start.getTime() + dayOffset * DAY_MS
+  );
+
+  const taskEnd = new Date(
+    start.getTime() +
+      (dayOffset + taskDays - 1) * DAY_MS
+  );
+
+  task.scheduledStart = toDateOnly(taskStart);
+  task.scheduledEnd = toDateOnly(taskEnd);
+  task.overflow = false;
+
+  dayOffset += taskDays;
+}
 
   let warning: string | undefined;
 
