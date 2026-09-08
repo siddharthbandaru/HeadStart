@@ -5,6 +5,7 @@ import {
 } from "./types";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
+const DEFAULT_DAILY_AVAILABLE_MINUTES = 120;
 
 function toDateOnly(date: Date) {
   return date.toISOString().split("T")[0];
@@ -26,8 +27,17 @@ export function generatePlan(input: AssignmentInput): GeneratedPlan {
     throw new Error("Due date must be after the available date.");
   }
 
-  // These tasks are temporary. Later, AI will create them from the
-  // assignment directions and rubric.
+  const dailyAvailableMinutes =
+    input.dailyAvailableMinutes ?? DEFAULT_DAILY_AVAILABLE_MINUTES;
+
+  if (
+    !Number.isFinite(dailyAvailableMinutes) ||
+    dailyAvailableMinutes <= 0
+  ) {
+    throw new Error("dailyAvailableMinutes must be greater than 0.");
+  }
+
+  // Temporary tasks. Later, AI will generate these from directions/rubric.
   const tasks: PlannerTask[] = [
     {
       id: "research",
@@ -79,10 +89,21 @@ export function generatePlan(input: AssignmentInput): GeneratedPlan {
   const bufferDays = Math.max(1, Math.ceil(totalDays * 0.1));
   const workDays = Math.max(1, totalDays - bufferDays);
 
+  const availableCapacityMinutes = workDays * dailyAvailableMinutes;
+  const estimatedDailyMinutes = totalMinutes / workDays;
+  const feasible = totalMinutes <= availableCapacityMinutes;
+
   let dayOffset = 0;
 
   for (const task of tasks) {
-    const taskDays = Math.max(1, Math.round(task.weight * workDays));
+    const idealTaskDays = Math.ceil(
+      task.estimatedMinutes / dailyAvailableMinutes
+    );
+    const weightedTaskDays = Math.max(
+      1,
+      Math.round(task.weight * workDays)
+    );
+    const taskDays = Math.max(idealTaskDays, weightedTaskDays);
 
     const taskStart = new Date(start.getTime() + dayOffset * DAY_MS);
     const taskEnd = new Date(
@@ -97,16 +118,26 @@ export function generatePlan(input: AssignmentInput): GeneratedPlan {
     dayOffset = Math.min(dayOffset, workDays - 1);
   }
 
-  const estimatedDailyMinutes = totalMinutes / workDays;
-  const warning =
-    estimatedDailyMinutes > 240
-      ? "This plan requires more than 4 hours of work per day on average."
-      : undefined;
+  let warning: string | undefined;
+
+  if (!feasible) {
+    const shortfall = totalMinutes - availableCapacityMinutes;
+    warning =
+      `This assignment needs about ${Math.ceil(totalMinutes / 60)} hours, ` +
+      `but the current schedule only has about ${Math.floor(
+        availableCapacityMinutes / 60
+      )} hours available. You are short by about ${Math.ceil(
+        shortfall / 60
+      )} hours.`;
+  }
 
   return {
     assignmentTitle: input.title,
     estimatedTotalMinutes: totalMinutes,
+    availableCapacityMinutes,
+    estimatedDailyMinutes,
     bufferDays,
+    feasible,
     warning,
     tasks,
   };
