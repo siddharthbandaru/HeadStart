@@ -93,6 +93,15 @@ export function generatePlan(input: AssignmentInput): GeneratedPlan {
   const estimatedDailyMinutes = totalMinutes / workDays;
   const feasible = totalMinutes <= availableCapacityMinutes;
 
+  const requiredWorkDays = Math.ceil(
+    totalMinutes / dailyAvailableMinutes
+  );
+  
+  const extraDaysNeeded = Math.max(
+    0,
+    requiredWorkDays - workDays
+  );
+
   let dayOffset = 0;
 
 for (const task of tasks) {
@@ -142,6 +151,7 @@ for (const task of tasks) {
     estimatedDailyMinutes,
     bufferDays,
     feasible,
+    extraDaysNeeded,
     warning,
     tasks,
   };
