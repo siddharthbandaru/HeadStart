@@ -21,6 +21,7 @@ export async function POST(request: Request) {
       rubric: body.rubric,
       availableFrom: body.availableFrom,
       dueDate: body.dueDate,
+      dailyAvailableMinutes: body.dailyAvailableMinutes,
     });
 
     return Response.json(plan, { status: 200 });
