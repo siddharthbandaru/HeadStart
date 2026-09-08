@@ -25,6 +25,7 @@ export type GeneratedPlan = {
   estimatedDailyMinutes: number;
   bufferDays: number;
   feasible: boolean;
+  extraDaysNeeded: number;
   warning?: string;
   tasks: PlannerTask[];
 };
