@@ -84,10 +84,8 @@ export default function NewAssignmentPage() {
       colorClasses: data.color_classes,
     });
 
-    // Automatically select the class the user just created
     setClassId(newClass.id);
 
-    // Reset the add-class form
     setNewClassName("");
     setShowAddClass(false);
   };
@@ -101,7 +99,7 @@ export default function NewAssignmentPage() {
       (classInfo) => classInfo.id === classId
     )
 
-    const { error } = await supabase
+    const { data, error } = await supabase
     .from("assignments")
     .insert({
       title: assignmentName,
@@ -113,23 +111,27 @@ export default function NewAssignmentPage() {
       estimated_hours: null,
       difficulty: null,
       status: "Not Started",
-    });
+    })
+    .select()
+    .single();
 
     if (error) {
-      console.error("Error saving assignment:", error);
+      console.error("Error saving assignment:", JSON.stringify(error, null, 2));
       return;
     }
 
-    const newAssignment = addAssignment({
-      title: assignmentName,
-      classId,
-      directions,
-      availableFrom,
-      dueDate: dueDate.split("T")[0],
+    addAssignment({
+      id: Number(data.id),
+      title: data.title,
+      classId: Number(data.class_id),
+      directions: data.directions ?? "",
+      availableFrom: data.available_from ?? "",
+      dueDate: data.due_date?.split("T")[0] ?? "",
     });
 
+
     router.push(
-      `/assignments/plan?assignmentId=${newAssignment.id}`
+      `/assignments/plan?assignmentId=${data.id}`
     );
   };
 
