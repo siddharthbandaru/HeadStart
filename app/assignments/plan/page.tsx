@@ -64,10 +64,10 @@ function AssignmentPlanContent() {
         checkpoint.estimatedMinutes > 0
     );
 
-    const handleAcceptPlan = () => {
+    const handleAcceptPlan = async () => {
       if (!assignment) return;
 
-      addCheckpoints(
+      await addCheckpoints(
         checkpoints.map((checkpoint) => ({
           assignmentId: assignment.id,
           title: checkpoint.title,

@@ -38,12 +38,7 @@ export default function AssignmentPage() {
     deleteAssignment,
   } = useHeadstart();
 
-  console.log("params:", params);
-
   const assignmentId = Number(params.id);
-
-  console.log("URL id:", assignmentId);
-  console.log("Assignment ids:", assignments.map((a) => a.id));
 
   const assignment = assignments.find(
     (assignment) =>

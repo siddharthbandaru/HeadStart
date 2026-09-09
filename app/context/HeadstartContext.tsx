@@ -19,7 +19,7 @@ import {
   ClassInfo,
 } from "../data/headstartData";
 
-type NewAssignment = Omit<Assignment, "id">;
+type NewAssignment = Assignment;
 type NewCheckpoint = Omit<Checkpoint, "id">;
 type NewClass = ClassInfo;
 
@@ -51,7 +51,7 @@ type HeadstartContextType = {
 
   addCheckpoints: (
     checkpoints: NewCheckpoint[]
-  ) => void;
+  ) => Promise<void>;
 
   toggleCheckpoint: (
     id: number
@@ -82,15 +82,32 @@ export function HeadstartProvider({
 
 
   useEffect(() => {
-    const savedAssignments =
-      localStorage.getItem(
-        "headstart-assignments"
-      );
+    const loadCheckpoints = async () => {
+    const { data, error } = await supabase
+      .from("checkpoints")
+      .select("*")
+      .order("id");
 
-    const savedCheckpoints =
-      localStorage.getItem(
-        "headstart-checkpoints"
-      );
+    if (error) {
+      console.error("Error loading checkpoints:", error);
+      return;
+    }
+
+    const formattedCheckpoints: Checkpoint[] = data.map(
+      (checkpoint) => ({
+        id: Number(checkpoint.id),
+        assignmentId: Number(checkpoint.assignment_id),
+        title: checkpoint.title,
+        date: checkpoint.date,
+        estimatedMinutes: checkpoint.estimated_minutes,
+        completed: checkpoint.completed,
+      })
+    );
+
+    setCheckpoints(formattedCheckpoints);
+  };
+
+  loadCheckpoints();
 
     const loadClasses = async () => {
       const { data, error } = await supabase
@@ -119,9 +136,7 @@ export function HeadstartProvider({
         .from("assignments")
         .select("*")
         .order("id");
-        
-      console.log("RAW SUPABASE ASSIGNMENTS:", data);
-      
+              
       if (error) {
         console.error("Error loading assignments:", error);
         return;
@@ -143,42 +158,10 @@ export function HeadstartProvider({
 
     loadAssignments();
 
-    if (savedAssignments) {
-      setAssignments(
-        JSON.parse(savedAssignments)
-      );
-    }
-
-
-    if (savedCheckpoints) {
-      setCheckpoints(
-        JSON.parse(savedCheckpoints)
-      );
-    }
 
     setHasLoaded(true);
   }, []);
 
-
-  useEffect(() => {
-    if (!hasLoaded) return;
-
-    localStorage.setItem(
-      "headstart-assignments",
-      JSON.stringify(assignments)
-    );
-  }, [assignments, hasLoaded]);
-
-
-
-  useEffect(() => {
-    if (!hasLoaded) return;
-
-    localStorage.setItem(
-      "headstart-checkpoints",
-      JSON.stringify(checkpoints)
-    );
-  }, [checkpoints, hasLoaded]);
 
   const addAssignment = (
     assignment: NewAssignment
@@ -200,7 +183,7 @@ export function HeadstartProvider({
     setAssignments(
       (currentAssignments) => [
         ...currentAssignments,
-        newAssignment,
+        assignment,
       ]
     );
 
@@ -269,35 +252,42 @@ export function HeadstartProvider({
     );
   };
 
-  const addCheckpoints = (
+  const addCheckpoints = async (
     newCheckpoints: NewCheckpoint[]
   ) => {
-    setCheckpoints(
-      (currentCheckpoints) => {
-        const startingId =
-          currentCheckpoints.length === 0
-            ? 1
-            : Math.max(
-                ...currentCheckpoints.map(
-                  (checkpoint) =>
-                    checkpoint.id
-                )
-              ) + 1;
+    const rows = newCheckpoints.map((checkpoint) => ({
+      assignment_id: checkpoint.assignmentId,
+      title: checkpoint.title,
+      date: checkpoint.date,
+      estimated_minutes: checkpoint.estimatedMinutes,
+      completed: checkpoint.completed,
+    }));
 
-        const checkpointsWithIds =
-          newCheckpoints.map(
-            (checkpoint, index) => ({
-              ...checkpoint,
-              id: startingId + index,
-            })
-          );
+    const { data, error } = await supabase
+      .from("checkpoints")
+      .insert(rows)
+      .select();
 
-        return [
-          ...currentCheckpoints,
-          ...checkpointsWithIds,
-        ];
-      }
+    if (error) {
+      console.error("Error saving checkpoints:", error);
+      return;
+    }
+
+    const formattedCheckpoints: Checkpoint[] = data.map(
+      (checkpoint) => ({
+        id: Number(checkpoint.id),
+        assignmentId: Number(checkpoint.assignment_id),
+        title: checkpoint.title,
+        date: checkpoint.date,
+        estimatedMinutes: checkpoint.estimated_minutes,
+        completed: checkpoint.completed,
+      })
     );
+
+    setCheckpoints((currentCheckpoints) => [
+      ...currentCheckpoints,
+      ...formattedCheckpoints,
+    ]);
   };
 
   const toggleCheckpoint = (
