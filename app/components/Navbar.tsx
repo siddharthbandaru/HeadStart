@@ -20,6 +20,13 @@ export default function Navbar() {
             Assignments
           </Link>
 
+          <Link
+            href="/classes"
+            className="text-gray-600 hover:text-black"
+          >
+            Classes
+          </Link>
+
 
           <Link href="/todo" className="text-gray-600 hover:text-black">
             To-Do

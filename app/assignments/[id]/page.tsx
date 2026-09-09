@@ -30,8 +30,6 @@ export default function AssignmentPage() {
   const params = useParams();
   const router = useRouter();
 
-  const assignmentId = Number(params.id);
-
   const {
     assignments,
     checkpoints,
@@ -40,9 +38,16 @@ export default function AssignmentPage() {
     deleteAssignment,
   } = useHeadstart();
 
+  console.log("params:", params);
+
+  const assignmentId = Number(params.id);
+
+  console.log("URL id:", assignmentId);
+  console.log("Assignment ids:", assignments.map((a) => a.id));
+
   const assignment = assignments.find(
     (assignment) =>
-      assignment.id === assignmentId
+      assignment.id === Number(params.id)
   );
 
   const assignmentCheckpoints =

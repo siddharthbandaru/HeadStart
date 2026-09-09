@@ -1,5 +1,7 @@
 "use client";
 
+import { supabase } from "@/lib/supabase";
+
 import {
   createContext,
   useContext,
@@ -19,7 +21,7 @@ import {
 
 type NewAssignment = Omit<Assignment, "id">;
 type NewCheckpoint = Omit<Checkpoint, "id">;
-type NewClass = Omit<ClassInfo, "id">;
+type NewClass = ClassInfo;
 
 type HeadstartContextType = {
   assignments: Assignment[];
@@ -85,15 +87,61 @@ export function HeadstartProvider({
         "headstart-assignments"
       );
 
-    const savedClasses =
-      localStorage.getItem(
-        "headstart-classes"
-      );
-
     const savedCheckpoints =
       localStorage.getItem(
         "headstart-checkpoints"
       );
+
+    const loadClasses = async () => {
+      const { data, error } = await supabase
+        .from("classes")
+        .select("*")
+        .order("id");
+
+      if (error) {
+        console.error("Error loading classes:", error);
+        return;
+      }
+
+      const formattedClasses: ClassInfo[] = data.map((classInfo) => ({
+        id: classInfo.id,
+        name: classInfo.name,
+        colorClasses: classInfo.color_classes,
+      }));
+
+      setClasses(formattedClasses);
+    };
+
+    loadClasses();
+
+    const loadAssignments = async () => {
+      const { data, error } = await supabase
+        .from("assignments")
+        .select("*")
+        .order("id");
+        
+      console.log("RAW SUPABASE ASSIGNMENTS:", data);
+      
+      if (error) {
+        console.error("Error loading assignments:", error);
+        return;
+      }
+
+      const formattedAssignments: Assignment[] = data.map(
+        (assignment) => ({
+          id: Number(assignment.id),
+          title: assignment.title,
+          classId: Number(assignment.class_id),
+          directions: assignment.directions ?? "",
+          availableFrom: assignment.available_from ?? "",
+          dueDate: assignment.due_date?.split("T")[0] ?? "",
+        })
+      );
+
+      setAssignments(formattedAssignments);
+    };
+
+    loadAssignments();
 
     if (savedAssignments) {
       setAssignments(
@@ -101,11 +149,6 @@ export function HeadstartProvider({
       );
     }
 
-    if (savedClasses) {
-      setClasses(
-        JSON.parse(savedClasses)
-      );
-    }
 
     if (savedCheckpoints) {
       setCheckpoints(
@@ -126,15 +169,6 @@ export function HeadstartProvider({
     );
   }, [assignments, hasLoaded]);
 
-
-  useEffect(() => {
-    if (!hasLoaded) return;
-
-    localStorage.setItem(
-      "headstart-classes",
-      JSON.stringify(classes)
-    );
-  }, [classes, hasLoaded]);
 
 
   useEffect(() => {
@@ -193,16 +227,6 @@ export function HeadstartProvider({
   ): ClassInfo => {
     const newClass: ClassInfo = {
       ...classInfo,
-
-      id:
-        classes.length === 0
-          ? 1
-          : Math.max(
-              ...classes.map(
-                (classInfo) =>
-                  classInfo.id
-              )
-            ) + 1,
     };
 
     setClasses(

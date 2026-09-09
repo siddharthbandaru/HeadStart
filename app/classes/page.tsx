@@ -1,5 +1,6 @@
 "use client";
 
+import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { useHeadstart } from "../context/HeadstartContext";
 
@@ -56,12 +57,28 @@ export default function ClassesPage() {
     },
   ];
 
-  const handleAddClass = () => {
+  const handleAddClass = async () => {
     if (!newClassName.trim()) return;
 
-    addClass({
+  const { data, error } = await supabase
+    .from("classes")
+    .insert({
       name: newClassName.trim(),
-      colorClasses: newClassColor,
+      color_classes: newClassColor,
+    })
+    .select()
+    .single();
+  
+
+    if (error) {
+      console.error("Error saving class:", error);
+      return;
+    }
+
+    addClass({
+      id: data.id,
+      name: data.name,
+      colorClasses: data.color_classes,
     });
 
     setNewClassName("");

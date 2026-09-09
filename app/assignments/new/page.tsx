@@ -1,5 +1,6 @@
 "use client";
 
+import { supabase } from '@/lib/supabase'
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHeadstart } from "../../context/HeadstartContext";
@@ -12,6 +13,7 @@ export default function NewAssignmentPage() {
     addClass,
     classes,
   } = useHeadstart();
+
 
   const [assignmentName, setAssignmentName] = useState("");
   const [directions, setDirections] = useState("");
@@ -58,13 +60,28 @@ export default function NewAssignmentPage() {
       preview: "bg-orange-300",
     },
   ];
-  
-  const handleAddClass = () => {
+
+  const handleAddClass = async () => {
     if (!newClassName.trim()) return;
 
+    const { data, error } = await supabase
+      .from("classes")
+      .insert({
+        name: newClassName.trim(),
+        color_classes: newClassColor,
+      })
+      .select()
+      .single();
+    
+
+    if (error) {
+      console.error("Error adding class:", error);
+      return;
+    }
     const newClass = addClass({
-      name: newClassName.trim(),
-      colorClasses: "bg-gray-200 border-gray-400",
+      id: data.id,
+      name: data.name,
+      colorClasses: data.color_classes,
     });
 
     // Automatically select the class the user just created
@@ -75,10 +92,33 @@ export default function NewAssignmentPage() {
     setShowAddClass(false);
   };
 
-  const handleSubmit = (
+  const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
+
+    const selectedClass = classes.find(
+      (classInfo) => classInfo.id === classId
+    )
+
+    const { error } = await supabase
+    .from("assignments")
+    .insert({
+      title: assignmentName,
+      course: selectedClass?.name ?? "",
+      class_id: classId,
+      directions: directions,
+      available_from: availableFrom || null,
+      due_date: dueDate,
+      estimated_hours: null,
+      difficulty: null,
+      status: "Not Started",
+    });
+
+    if (error) {
+      console.error("Error saving assignment:", error);
+      return;
+    }
 
     const newAssignment = addAssignment({
       title: assignmentName,
@@ -165,7 +205,7 @@ export default function NewAssignmentPage() {
             </button>
 
             {showAddClass && (
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 rounded-xl border border-gray-200 p-4">
                 <input
                   type="text"
                   value={newClassName}
@@ -173,15 +213,37 @@ export default function NewAssignmentPage() {
                     setNewClassName(event.target.value)
                   }
                   placeholder="e.g. COP 4600"
-                  className="flex-1 rounded-lg border border-gray-300 px-4 py-3"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3"
                 />
+
+                <p className="mt-4 text-sm font-medium text-gray-600">
+                  Class color
+                </p>
+
+                <div className="mt-2 flex gap-3">
+                  {classColors.map((color) => (
+                    <button
+                      key={color.name}
+                      type="button"
+                      onClick={() =>
+                        setNewClassColor(color.value)
+                      }
+                      aria-label={`Choose ${color.name}`}
+                      className={`h-8 w-8 rounded-full ${color.preview} ${
+                        newClassColor === color.value
+                          ? "ring-2 ring-black ring-offset-2"
+                          : ""
+                      }`}
+                    />
+                  ))}
+                </div>
 
                 <button
                   type="button"
                   onClick={handleAddClass}
-                  className="rounded-lg bg-black px-4 py-3 font-medium text-white"
+                  className="mt-4 w-full rounded-lg bg-black px-4 py-3 font-medium text-white"
                 >
-                  Add
+                  Add Class
                 </button>
               </div>
             )}
