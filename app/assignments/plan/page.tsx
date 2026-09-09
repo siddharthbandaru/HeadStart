@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useHeadstart } from "../../context/HeadstartContext";
 import { generatePlan } from "../../utils/generatePlan";
 
-export default function AssignmentPlanPage() {
+function AssignmentPlanContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -225,5 +225,21 @@ export default function AssignmentPlanPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function AssignmentPlanPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen bg-gray-50 px-6 py-12">
+          <div className="mx-auto max-w-3xl">
+            <p>Loading plan...</p>
+          </div>
+        </main>
+      }
+    >
+      <AssignmentPlanContent />
+    </Suspense>
   );
 }

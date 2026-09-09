@@ -8,6 +8,8 @@ export type Assignment = {
   id: number;
   title: string;
   classId: number;
+  directions: string;
+  availableFrom: string;
   dueDate: string;
 };
 
@@ -43,18 +45,24 @@ export const assignments: Assignment[] = [
     id: 1,
     title: "Research Paper",
     classId: 1,
+    directions: "Write a research paper using academic sources.",
+    availableFrom: "2026-09-05",
     dueDate: "2026-09-15",
   },
   {
     id: 2,
     title: "Operating Systems Project",
     classId: 2,
+    directions: "Complete the operating systems programming project.",
+    availableFrom: "2026-09-05",
     dueDate: "2026-09-20",
   },
   {
     id: 3,
     title: "Design Presentation",
     classId: 3,
+    directions: "Create and present a design presentation.",
+    availableFrom: "2026-09-05",
     dueDate: "2026-09-25",
   },
 ];
