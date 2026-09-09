@@ -1,9 +1,8 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useHeadstart } from "../../context/HeadstartContext";
-import { generatePlan } from "../../utils/generatePlan";
 
 function AssignmentPlanContent() {
   const router = useRouter();
@@ -22,9 +21,83 @@ function AssignmentPlanContent() {
     (assignment) => assignment.id === assignmentId
   );
 
-  const [checkpoints, setCheckpoints] = useState(
-    () => assignment ? generatePlan(assignment) : []
-  );
+  const [checkpoints, setCheckpoints] = useState<
+    {
+      id: number;
+      date: string;
+      title: string;
+      estimatedMinutes: number;
+    }[]
+  >([]);
+
+  const [loading, setLoading] = useState(true);
+  const [warning, setWarning] = useState<string | undefined>();
+  const [feasible, setFeasible] = useState<boolean | null>(null);
+  const [estimatedTotalMinutes, setEstimatedTotalMinutes] = useState(0);
+  const [bufferDays, setBufferDays] = useState(0);
+
+  useEffect(() => {
+    if (!assignment) return;
+
+    const loadPlan = async () => {
+      try {
+        setLoading(true);
+
+        const response = await fetch("/api/generate-plan", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            title: assignment.title,
+            directions: assignment.directions,
+            availableFrom:
+              assignment.availableFrom ||
+              new Date().toISOString().split("T")[0],
+            dueDate: assignment.dueDate,
+            dailyAvailableMinutes: 120,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error("Planner error:", data);
+          return;
+        }
+
+        setFeasible(data.feasible);
+        setWarning(data.warning);
+        setEstimatedTotalMinutes(data.estimatedTotalMinutes);
+        setBufferDays(data.bufferDays);
+
+        setCheckpoints(
+          data.tasks.map(
+            (
+              task: {
+                id: string;
+                title: string;
+                estimatedMinutes: number;
+                scheduledStart?: string;
+              },
+              index: number
+            ) => ({
+              id: index + 1,
+              title: task.title,
+              estimatedMinutes: task.estimatedMinutes,
+              date: task.scheduledStart ?? "",
+            })
+          )
+        );
+      } catch (error) {
+        console.error("Failed to generate plan:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPlan();
+  }, [assignment]);
 
   const updateCheckpoint = (
     id: number,
@@ -64,10 +137,10 @@ function AssignmentPlanContent() {
         checkpoint.estimatedMinutes > 0
     );
 
-    const handleAcceptPlan = () => {
+    const handleAcceptPlan = async () => {
       if (!assignment) return;
 
-      addCheckpoints(
+      await addCheckpoints(
         checkpoints.map((checkpoint) => ({
           assignmentId: assignment.id,
           title: checkpoint.title,
@@ -81,6 +154,18 @@ function AssignmentPlanContent() {
         `/assignments/${assignment.id}`
       );
     };
+
+    if (loading) {
+      return (
+        <main className="min-h-screen bg-gray-50 px-6 py-12">
+          <div className="mx-auto max-w-3xl">
+            <div className="rounded-2xl bg-white p-8 shadow-sm">
+              <p>Generating your plan...</p>
+            </div>
+          </div>
+        </main>
+      );
+    }
 
     if (!assignment) {
       return (
@@ -119,6 +204,47 @@ function AssignmentPlanContent() {
               day: "numeric",
             })}
           </p>
+        </div>
+
+        <div className="mb-8 rounded-2xl bg-white p-6 shadow-sm">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div>
+              <p className="text-sm text-gray-500">
+                Estimated workload
+              </p>
+              <p className="mt-1 text-xl font-semibold">
+                {Math.ceil(estimatedTotalMinutes / 60)} hrs
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">
+                Buffer
+              </p>
+              <p className="mt-1 text-xl font-semibold">
+                {bufferDays} days
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">
+                Status
+              </p>
+              <p
+                className={`mt-1 text-xl font-semibold ${
+                  feasible ? "text-green-600" : "text-red-600"
+                }`}
+              >
+                {feasible ? "On track" : "Not feasible"}
+              </p>
+            </div>
+          </div>
+
+          {warning && (
+            <div className="mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-700">
+              {warning}
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">
