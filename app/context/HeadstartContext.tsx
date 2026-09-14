@@ -34,7 +34,7 @@ type HeadstartContextType = {
 
   deleteAssignment: (
     id: number
-  ) => void;
+  ) => Promise<void>;
 
   addClass: (
     classInfo: NewClass
@@ -43,11 +43,11 @@ type HeadstartContextType = {
   updateClass: (
     id: number,
     name: string
-  ) => void;
+  ) => Promise<void>;
 
   deleteClass: (
     id: number
-  ) => void;
+  ) => Promise<void>;
 
   addCheckpoints: (
     checkpoints: NewCheckpoint[]
@@ -55,7 +55,7 @@ type HeadstartContextType = {
 
   toggleCheckpoint: (
     id: number
-  ) => void;
+  ) => Promise<void>;
 };
 
 const HeadstartContext =
@@ -190,7 +190,33 @@ export function HeadstartProvider({
     return newAssignment;
   };
 
-  const deleteAssignment = (id: number) => {
+  const deleteAssignment = async (id: number) => {
+    const { error: checkpointError } = await supabase
+      .from("checkpoints")
+      .delete()
+      .eq("assignment_id", id);
+
+    if (checkpointError) {
+      console.error(
+        "Error deleting assignment checkpoints:",
+        checkpointError
+      );
+      return;
+    }
+
+    const { error: assignmentError } = await supabase
+      .from("assignments")
+      .delete()
+      .eq("id", id);
+
+    if (assignmentError) {
+      console.error(
+        "Error deleting assignment:",
+        assignmentError
+      );
+      return;
+    }
+
     setAssignments((currentAssignments) =>
       currentAssignments.filter(
         (assignment) => assignment.id !== id
@@ -222,10 +248,19 @@ export function HeadstartProvider({
     return newClass;
   };
 
-  const updateClass = (
+  const updateClass = async (
     id: number,
     name: string
   ) => {
+    const { error } = await supabase
+      .from("classes")
+      .update({ name })
+      .eq("id", id);
+
+    if (error){
+      console.error("Error updating class", error);
+      return;
+    }
     setClasses(
       (currentClasses) =>
         currentClasses.map(
@@ -240,9 +275,19 @@ export function HeadstartProvider({
     );
   };
 
-  const deleteClass = (
+  const deleteClass = async (
     id: number
   ) => {
+    const { error } = await supabase
+      .from("classes")
+      .delete()
+      .eq("id", id);
+    
+    if (error) {
+      console.error("Error deleting class", error);
+      return;
+    }
+
     setClasses(
       (currentClasses) =>
         currentClasses.filter(
@@ -290,9 +335,28 @@ export function HeadstartProvider({
     ]);
   };
 
-  const toggleCheckpoint = (
+  const toggleCheckpoint = async (
     id: number
   ) => {
+    const checkpoint = checkpoints.find(
+      (checkpoint) => checkpoint.id === id
+    );
+
+    if (!checkpoint) return;
+
+    const newCompleted = !checkpoint.completed;
+
+    const { error } = await supabase
+    .from("checkpoints")
+    .update({
+      completed: newCompleted,
+    })
+    .eq("id", id);
+
+    if (error) {
+      console.error("Error updating checkpoint:", error);
+      return;
+    }
     setCheckpoints(
       (currentCheckpoints) =>
         currentCheckpoints.map(
@@ -300,8 +364,7 @@ export function HeadstartProvider({
             checkpoint.id === id
               ? {
                   ...checkpoint,
-                  completed:
-                    !checkpoint.completed,
+                  completed: newCompleted,
                 }
               : checkpoint
         )

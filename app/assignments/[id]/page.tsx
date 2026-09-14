@@ -93,14 +93,14 @@ export default function AssignmentPage() {
       classInfo.id === assignment.classId
   );
 
-  const handleDeleteAssignment = () => {
+  const handleDeleteAssignment = async () => {
     const confirmed = window.confirm(
       `Delete "${assignment.title}"? This will also delete all of its checkpoints.`
     );
 
     if (!confirmed) return;
 
-    deleteAssignment(assignment.id);
+    await deleteAssignment(assignment.id);
 
     router.push("/assignments");
   };

@@ -92,7 +92,7 @@ export default function ClassesPage() {
     setEditingClassName(name);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (
       editingClassId === null ||
       !editingClassName.trim()
@@ -100,7 +100,7 @@ export default function ClassesPage() {
       return;
     }
 
-    updateClass(
+    await updateClass(
       editingClassId,
       editingClassName.trim()
     );
@@ -109,7 +109,7 @@ export default function ClassesPage() {
     setEditingClassName("");
   };
 
-  const handleDeleteClass = (id: number) => {
+  const handleDeleteClass = async (id: number) => {
     const classHasAssignments = assignments.some(
         (assignment) => assignment.classId === id
     );
@@ -122,7 +122,7 @@ export default function ClassesPage() {
         return;
     }
 
-    deleteClass(id);
+    await deleteClass(id);
     };
 
   return (
