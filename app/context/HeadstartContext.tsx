@@ -166,19 +166,6 @@ export function HeadstartProvider({
   const addAssignment = (
     assignment: NewAssignment
   ): Assignment => {
-    const newAssignment: Assignment = {
-      ...assignment,
-
-      id:
-        assignments.length === 0
-          ? 1
-          : Math.max(
-              ...assignments.map(
-                (assignment) =>
-                  assignment.id
-              )
-            ) + 1,
-    };
 
     setAssignments(
       (currentAssignments) => [
@@ -187,7 +174,7 @@ export function HeadstartProvider({
       ]
     );
 
-    return newAssignment;
+    return assignment;
   };
 
   const deleteAssignment = async (id: number) => {

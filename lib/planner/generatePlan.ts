@@ -15,9 +15,17 @@ function daysBetween(start: Date, end: Date) {
   return Math.max(1, Math.ceil((end.getTime() - start.getTime()) / DAY_MS));
 }
 
-function getTasksForAssignment(
-  input: AssignmentInput
-): PlannerTask[] {
+type AssignmentType =
+  | "programming"
+  | "presentation"
+  | "paper"
+  | "homework"
+  | "lab"
+  | "exam"
+  | "reading"
+  | "general";
+
+function detectAssignmentType(input: AssignmentInput): AssignmentType {
   const text = `${input.title} ${input.directions}`.toLowerCase();
 
   if (
@@ -25,40 +33,114 @@ function getTasksForAssignment(
     text.includes("code") ||
     text.includes("coding") ||
     text.includes("software") ||
-    text.includes("project")
+    text.includes("implementation")
   ) {
+    return "programming";
+  }
+
+  if (
+    text.includes("presentation") ||
+    text.includes("slides") ||
+    text.includes("powerpoint") ||
+    text.includes("present")
+  ) {
+    return "presentation";
+  }
+
+  if (
+    text.includes("paper") ||
+    text.includes("essay") ||
+    text.includes("research") ||
+    text.includes("report")
+  ) {
+    return "paper";
+  }
+
+  if (
+    text.includes("homework") ||
+    text.includes("problem set") ||
+    text.includes("worksheet") ||
+    text.includes("problems") ||
+    text.includes("questions")
+  ) {
+    return "homework";
+  }
+
+  if (
+    text.includes("lab") ||
+    text.includes("experiment") ||
+    text.includes("laboratory")
+  ) {
+    return "lab";
+  }
+
+  if (
+    text.includes("exam") ||
+    text.includes("midterm") ||
+    text.includes("final exam") ||
+    text.includes("quiz") ||
+    text.includes("test")
+  ) {
+    return "exam";
+  }
+
+  if (
+    text.includes("reading") ||
+    text.includes("chapter") ||
+    text.includes("read ")
+  ) {
+    return "reading";
+  }
+
+  return "general";
+}
+
+function getTasksForAssignment(
+  input: AssignmentInput
+): PlannerTask[] {
+  const type = detectAssignmentType(input);
+  const text = `${input.title} ${input.directions}`.toLowerCase();
+
+  if (type === "programming") {
     return [
       {
         id: "requirements",
-        title: "Review project requirements",
+        title: "Review project requirements and deliverables",
         estimatedMinutes: 45,
         weight: 0,
         dependencies: [],
       },
       {
         id: "planning",
-        title: "Plan implementation",
+        title: "Plan solution and break project into components",
         estimatedMinutes: 60,
         weight: 0,
         dependencies: ["requirements"],
       },
       {
-        id: "implementation",
-        title: "Build core functionality",
-        estimatedMinutes: 300,
+        id: "setup",
+        title: "Set up project files and development environment",
+        estimatedMinutes: 45,
         weight: 0,
         dependencies: ["planning"],
       },
       {
+        id: "implementation",
+        title: "Implement core functionality",
+        estimatedMinutes: 240,
+        weight: 0,
+        dependencies: ["setup"],
+      },
+      {
         id: "testing",
-        title: "Test and debug",
-        estimatedMinutes: 180,
+        title: "Test features and debug issues",
+        estimatedMinutes: 150,
         weight: 0,
         dependencies: ["implementation"],
       },
       {
         id: "final-review",
-        title: "Final review and submission check",
+        title: "Review requirements and prepare final submission",
         estimatedMinutes: 45,
         weight: 0,
         dependencies: ["testing"],
@@ -66,11 +148,7 @@ function getTasksForAssignment(
     ];
   }
 
-  if (
-    text.includes("presentation") ||
-    text.includes("slides") ||
-    text.includes("powerpoint")
-  ) {
+  if (type === "presentation") {
     return [
       {
         id: "requirements",
@@ -81,75 +159,245 @@ function getTasksForAssignment(
       },
       {
         id: "research",
-        title: "Research and gather content",
-        estimatedMinutes: 120,
+        title: "Research topic and gather supporting content",
+        estimatedMinutes: 90,
         weight: 0,
         dependencies: ["requirements"],
       },
       {
         id: "outline",
         title: "Create presentation outline",
-        estimatedMinutes: 60,
+        estimatedMinutes: 45,
         weight: 0,
         dependencies: ["research"],
       },
       {
         id: "slides",
-        title: "Build slides",
-        estimatedMinutes: 180,
+        title: "Build and design slides",
+        estimatedMinutes: 150,
         weight: 0,
         dependencies: ["outline"],
       },
       {
-        id: "practice",
-        title: "Practice and complete final review",
-        estimatedMinutes: 90,
+        id: "speaker-notes",
+        title: "Prepare speaker notes or talking points",
+        estimatedMinutes: 60,
         weight: 0,
         dependencies: ["slides"],
+      },
+      {
+        id: "practice",
+        title: "Practice presentation and make final edits",
+        estimatedMinutes: 60,
+        weight: 0,
+        dependencies: ["speaker-notes"],
       },
     ];
   }
 
-  if (
-    text.includes("paper") ||
-    text.includes("essay") ||
-    text.includes("research")
-  ) {
+  if (type === "paper") {
     return [
       {
-        id: "research",
-        title: "Research and gather materials",
-        estimatedMinutes: 180,
+        id: "requirements",
+        title: "Review prompt and formatting requirements",
+        estimatedMinutes: 30,
         weight: 0,
         dependencies: [],
       },
       {
+        id: "research",
+        title: "Research and gather sources",
+        estimatedMinutes: 150,
+        weight: 0,
+        dependencies: ["requirements"],
+      },
+      {
         id: "outline",
-        title: "Create an outline",
+        title: "Create thesis and outline",
         estimatedMinutes: 60,
         weight: 0,
         dependencies: ["research"],
       },
       {
         id: "draft",
-        title: "Complete the main draft",
-        estimatedMinutes: 300,
+        title: "Write first draft",
+        estimatedMinutes: 240,
         weight: 0,
         dependencies: ["outline"],
       },
       {
         id: "revision",
-        title: "Revise against assignment requirements",
-        estimatedMinutes: 120,
+        title: "Revise content and strengthen arguments",
+        estimatedMinutes: 90,
         weight: 0,
         dependencies: ["draft"],
       },
       {
-        id: "final-review",
-        title: "Final proofread and formatting",
+        id: "citations",
+        title: "Check citations and formatting",
         estimatedMinutes: 45,
         weight: 0,
         dependencies: ["revision"],
+      },
+      {
+        id: "final-review",
+        title: "Proofread and prepare final submission",
+        estimatedMinutes: 45,
+        weight: 0,
+        dependencies: ["citations"],
+      },
+    ];
+  }
+
+  if (type === "homework") {
+    return [
+      {
+        id: "review",
+        title: "Review instructions and identify required problems",
+        estimatedMinutes: 20,
+        weight: 0,
+        dependencies: [],
+      },
+      {
+        id: "concepts",
+        title: "Review relevant notes and concepts",
+        estimatedMinutes: 45,
+        weight: 0,
+        dependencies: ["review"],
+      },
+      {
+        id: "first-half",
+        title: "Complete first half of problems",
+        estimatedMinutes: 75,
+        weight: 0,
+        dependencies: ["concepts"],
+      },
+      {
+        id: "second-half",
+        title: "Complete remaining problems",
+        estimatedMinutes: 75,
+        weight: 0,
+        dependencies: ["first-half"],
+      },
+      {
+        id: "check",
+        title: "Check answers and correct mistakes",
+        estimatedMinutes: 45,
+        weight: 0,
+        dependencies: ["second-half"],
+      },
+    ];
+  }
+
+  if (type === "lab") {
+    return [
+      {
+        id: "prep",
+        title: "Review lab instructions and objectives",
+        estimatedMinutes: 30,
+        weight: 0,
+        dependencies: [],
+      },
+      {
+        id: "background",
+        title: "Review background concepts and procedures",
+        estimatedMinutes: 45,
+        weight: 0,
+        dependencies: ["prep"],
+      },
+      {
+        id: "lab-work",
+        title: "Complete lab procedure or implementation",
+        estimatedMinutes: 120,
+        weight: 0,
+        dependencies: ["background"],
+      },
+      {
+        id: "analysis",
+        title: "Analyze results and answer lab questions",
+        estimatedMinutes: 75,
+        weight: 0,
+        dependencies: ["lab-work"],
+      },
+      {
+        id: "report",
+        title: "Complete lab report and final review",
+        estimatedMinutes: 60,
+        weight: 0,
+        dependencies: ["analysis"],
+      },
+    ];
+  }
+
+  if (type === "exam") {
+    return [
+      {
+        id: "topics",
+        title: "Identify exam topics and weak areas",
+        estimatedMinutes: 30,
+        weight: 0,
+        dependencies: [],
+      },
+      {
+        id: "review",
+        title: "Review notes, lectures, and key concepts",
+        estimatedMinutes: 120,
+        weight: 0,
+        dependencies: ["topics"],
+      },
+      {
+        id: "practice",
+        title: "Complete practice problems or questions",
+        estimatedMinutes: 120,
+        weight: 0,
+        dependencies: ["review"],
+      },
+      {
+        id: "weak-areas",
+        title: "Review missed problems and weak areas",
+        estimatedMinutes: 75,
+        weight: 0,
+        dependencies: ["practice"],
+      },
+      {
+        id: "final-review",
+        title: "Complete final review and summary",
+        estimatedMinutes: 60,
+        weight: 0,
+        dependencies: ["weak-areas"],
+      },
+    ];
+  }
+
+  if (type === "reading") {
+    return [
+      {
+        id: "preview",
+        title: "Preview reading and learning objectives",
+        estimatedMinutes: 15,
+        weight: 0,
+        dependencies: [],
+      },
+      {
+        id: "reading",
+        title: "Complete assigned reading",
+        estimatedMinutes: 90,
+        weight: 0,
+        dependencies: ["preview"],
+      },
+      {
+        id: "notes",
+        title: "Take notes on key concepts",
+        estimatedMinutes: 45,
+        weight: 0,
+        dependencies: ["reading"],
+      },
+      {
+        id: "review",
+        title: "Review notes and summarize main ideas",
+        estimatedMinutes: 30,
+        weight: 0,
+        dependencies: ["notes"],
       },
     ];
   }
@@ -164,28 +412,28 @@ function getTasksForAssignment(
     },
     {
       id: "materials",
-      title: "Gather necessary materials",
-      estimatedMinutes: 60,
+      title: "Gather required materials and resources",
+      estimatedMinutes: 45,
       weight: 0,
       dependencies: ["requirements"],
     },
     {
       id: "work",
       title: "Complete main assignment work",
-      estimatedMinutes: 180,
+      estimatedMinutes: 150,
       weight: 0,
       dependencies: ["materials"],
     },
     {
       id: "review",
-      title: "Review and improve work",
+      title: "Review and improve completed work",
       estimatedMinutes: 60,
       weight: 0,
       dependencies: ["work"],
     },
     {
       id: "final-review",
-      title: "Final review and submission check",
+      title: "Complete final review and submission check",
       estimatedMinutes: 30,
       weight: 0,
       dependencies: ["review"],
@@ -243,35 +491,56 @@ export function generatePlan(input: AssignmentInput): GeneratedPlan {
     requiredWorkDays - workDays
   );
 
+  const extraAvailableDays = Math.max(
+    0,
+    workDays - requiredWorkDays
+  );
+
+  const gapBetweenTasks =
+    tasks.length > 1
+      ? extraAvailableDays / (tasks.length - 1)
+      : 0;
+
   let dayOffset = 0;
 
-for (const task of tasks) {
-  const taskDays = Math.ceil(
-    task.estimatedMinutes / dailyAvailableMinutes
-  );
+  tasks.forEach((task, index) => {
+    const taskDays = Math.ceil(
+      task.estimatedMinutes / dailyAvailableMinutes
+    );
 
-  // Not enough days left for this task
-  if (dayOffset + taskDays > workDays) {
-    task.overflow = true;
-    continue;
-  }
+    if (dayOffset + taskDays > workDays) {
+      task.overflow = true;
 
-  const taskStart = new Date(
-    start.getTime() + dayOffset * DAY_MS
-  );
+      const fallbackDate = new Date(
+        start.getTime() +
+          Math.min(Math.floor(dayOffset), workDays - 1) * DAY_MS
+      );
 
-  const taskEnd = new Date(
-    start.getTime() +
-      (dayOffset + taskDays - 1) * DAY_MS
-  );
+      task.scheduledStart = toDateOnly(fallbackDate);
+      task.scheduledEnd = toDateOnly(fallbackDate);
 
-  task.scheduledStart = toDateOnly(taskStart);
-  task.scheduledEnd = toDateOnly(taskEnd);
-  task.overflow = false;
+      return;
+    }
 
-  dayOffset += taskDays;
-}
+    const taskStart = new Date(
+      start.getTime() + Math.floor(dayOffset) * DAY_MS
+    );
 
+    const taskEnd = new Date(
+      start.getTime() +
+        (Math.floor(dayOffset) + taskDays - 1) * DAY_MS
+    );
+
+    task.scheduledStart = toDateOnly(taskStart);
+    task.scheduledEnd = toDateOnly(taskEnd);
+    task.overflow = false;
+
+    dayOffset += taskDays;
+
+    if (index < tasks.length - 1) {
+      dayOffset += gapBetweenTasks;
+    }
+  });
   let warning: string | undefined;
 
   if (!feasible) {

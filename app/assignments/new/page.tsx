@@ -1,6 +1,6 @@
 "use client";
 
-import { supabase } from '@/lib/supabase'
+import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useHeadstart } from "../../context/HeadstartContext";
@@ -9,7 +9,6 @@ export default function NewAssignmentPage() {
   const router = useRouter();
 
   const {
-    addAssignment,
     addClass,
     classes,
   } = useHeadstart();
@@ -29,6 +28,7 @@ export default function NewAssignmentPage() {
   const [newClassColor, setNewClassColor] = useState(
     "bg-blue-200 border-blue-400"
   );
+
   const classColors = [
     {
       name: "Blue",
@@ -73,12 +73,12 @@ export default function NewAssignmentPage() {
       })
       .select()
       .single();
-    
 
     if (error) {
       console.error("Error adding class:", error);
       return;
     }
+
     const newClass = addClass({
       id: data.id,
       name: data.name,
@@ -122,42 +122,24 @@ export default function NewAssignmentPage() {
 
     const selectedClass = classes.find(
       (classInfo) => classInfo.id === classId
-    )
-
-    const { data, error } = await supabase
-    .from("assignments")
-    .insert({
-      title: assignmentName,
-      course: selectedClass?.name ?? "",
-      class_id: classId,
-      directions: directions,
-      available_from: availableFrom || null,
-      due_date: dueDate,
-      estimated_hours: null,
-      difficulty: null,
-      status: "Not Started",
-    })
-    .select()
-    .single();
-
-    if (error) {
-      console.error("Error saving assignment:", JSON.stringify(error, null, 2));
-      return;
-    }
-
-    addAssignment({
-      id: Number(data.id),
-      title: data.title,
-      classId: Number(data.class_id),
-      directions: data.directions ?? "",
-      availableFrom: data.available_from ?? "",
-      dueDate: data.due_date?.split("T")[0] ?? "",
-    });
-
-
-    router.push(
-      `/assignments/plan?assignmentId=${data.id}`
     );
+
+    const pendingAssignment = {
+      title: assignmentName.trim(),
+      course: selectedClass?.name ?? "",
+      classId,
+      directions: directions.trim(),
+      availableFrom:
+        availableFrom || new Date().toISOString().split("T")[0],
+      dueDate,
+    };
+
+    sessionStorage.setItem(
+      "pendingAssignment",
+      JSON.stringify(pendingAssignment)
+    );
+
+    router.push("/assignments/plan");
   };
 
   return (
@@ -168,7 +150,7 @@ export default function NewAssignmentPage() {
         </h1>
 
         <p className="mt-2 text-gray-600">
-          Add your assignment details and Headstart will build a plan for you.
+          Add your assignment details and HeadStart will build a plan for you.
         </p>
 
         <form
@@ -310,7 +292,7 @@ export default function NewAssignmentPage() {
             />
 
             <p className="mt-1 text-sm text-gray-500">
-              Optional. If left blank, Headstart will plan from today.
+              Optional. If left blank, HeadStart will plan from today.
             </p>
           </div>
 
