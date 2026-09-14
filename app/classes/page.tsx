@@ -25,36 +25,12 @@ export default function ClassesPage() {
     useState("");
 
   const classColors = [
-    {
-      name: "Blue",
-      value: "bg-blue-200 border-blue-400",
-      preview: "bg-blue-300",
-    },
-    {
-      name: "Purple",
-      value: "bg-purple-200 border-purple-400",
-      preview: "bg-purple-300",
-    },
-    {
-      name: "Green",
-      value: "bg-green-200 border-green-400",
-      preview: "bg-green-300",
-    },
-    {
-      name: "Pink",
-      value: "bg-pink-200 border-pink-400",
-      preview: "bg-pink-300",
-    },
-    {
-      name: "Yellow",
-      value: "bg-yellow-200 border-yellow-400",
-      preview: "bg-yellow-300",
-    },
-    {
-      name: "Orange",
-      value: "bg-orange-200 border-orange-400",
-      preview: "bg-orange-300",
-    },
+    { name: "Blue", value: "#93C5FD" },
+  { name: "Purple", value: "#C4B5FD" },
+  { name: "Green", value: "#86EFAC" },
+  { name: "Pink", value: "#F9A8D4" },
+  { name: "Yellow", value: "#FDE047" },
+  { name: "Orange", value: "#FDBA74" },
   ];
 
   const handleAddClass = async () => {
@@ -166,11 +142,12 @@ export default function ClassesPage() {
                   setNewClassColor(color.value)
                 }
                 aria-label={`Choose ${color.name}`}
-                className={`h-8 w-8 rounded-full ${color.preview} ${
+                className={`h-8 w-8 rounded-full" ${
                   newClassColor === color.value
                     ? "ring-2 ring-black ring-offset-2"
                     : ""
                 }`}
+                style={{ backgroundColor: color.value }}
               />
             ))}
           </div>
