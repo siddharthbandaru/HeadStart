@@ -191,28 +191,14 @@ export function HeadstartProvider({
   };
 
   const deleteAssignment = async (id: number) => {
-    const { error: checkpointError } = await supabase
-      .from("checkpoints")
-      .delete()
-      .eq("assignment_id", id);
-
-    if (checkpointError) {
-      console.error(
-        "Error deleting assignment checkpoints:",
-        checkpointError
-      );
-      return;
-    }
-
-    const { error: assignmentError } = await supabase
+    const { error } = await supabase
       .from("assignments")
       .delete()
       .eq("id", id);
 
-    if (assignmentError) {
+    if (error) {
       console.error(
-        "Error deleting assignment:",
-        assignmentError
+        "Error deleting assignment", JSON.stringify(error, null, 2)
       );
       return;
     }

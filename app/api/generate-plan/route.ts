@@ -5,11 +5,13 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Partial<AssignmentInput>;
 
-    if (!body.title || !body.directions || !body.availableFrom || !body.dueDate) {
+    const startDate = body.availableFrom || new Date().toISOString().split("T")[0];
+
+    if (!body.title || !body.directions || !body.dueDate) {
       return Response.json(
         {
           error:
-            "title, directions, availableFrom, and dueDate are required.",
+            "title, directions, and dueDate are required.",
         },
         { status: 400 }
       );
@@ -19,7 +21,7 @@ export async function POST(request: Request) {
       title: body.title,
       directions: body.directions,
       rubric: body.rubric,
-      availableFrom: body.availableFrom,
+      availableFrom: startDate,
       dueDate: body.dueDate,
       dailyAvailableMinutes: body.dailyAvailableMinutes,
     });

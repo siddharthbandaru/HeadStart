@@ -62,7 +62,9 @@ function AssignmentPlanContent() {
         const data = await response.json();
 
         if (!response.ok) {
-          console.error("Planner error:", data);
+          console.error(
+            `Planner failed with status ${response.status}: ${JSON.stringify(data)}`
+          );
           return;
         }
 

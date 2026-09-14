@@ -14,6 +14,7 @@ export default function NewAssignmentPage() {
     classes,
   } = useHeadstart();
 
+  const [formError, setFormError] = useState("");
 
   const [assignmentName, setAssignmentName] = useState("");
   const [directions, setDirections] = useState("");
@@ -95,6 +96,30 @@ export default function NewAssignmentPage() {
   ) => {
     event.preventDefault();
 
+    setFormError("");
+
+    if (!assignmentName.trim()) {
+      setFormError("Please enter an assignment name.");
+      return;
+    }
+
+    if (!directions.trim()) {
+      setFormError(
+        "Please add assignment directions so HeadStart can generate your plan."
+      );
+      return;
+    }
+
+    if (!dueDate) {
+      setFormError("Please select a due date.");
+      return;
+    }
+
+    if (!classId) {
+      setFormError("Please select a class.");
+      return;
+    }
+
     const selectedClass = classes.find(
       (classInfo) => classInfo.id === classId
     )
@@ -148,6 +173,7 @@ export default function NewAssignmentPage() {
 
         <form
           onSubmit={handleSubmit}
+          noValidate
           className="mt-8 space-y-6"
         >
           {/* Assignment Name */}
@@ -333,7 +359,12 @@ export default function NewAssignmentPage() {
             </p>
           </div>
 
-          {/* Generate Plan */}
+          {formError && (
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {formError}
+            </div>
+          )}
+
           <button
             type="submit"
             className="w-full rounded-lg bg-black px-6 py-3 font-medium text-white"
