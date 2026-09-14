@@ -1,14 +1,164 @@
+"use client";
+
+import { supabase } from "@/lib/supabase";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useHeadstart } from "../../context/HeadstartContext";
+
 export default function NewAssignmentPage() {
+  const router = useRouter();
+
+  const {
+    addClass,
+    classes,
+  } = useHeadstart();
+
+  const [formError, setFormError] = useState("");
+
+  const [assignmentName, setAssignmentName] = useState("");
+  const [directions, setDirections] = useState("");
+  const [availableFrom, setAvailableFrom] = useState("");
+  const [dueDate, setDueDate] = useState("");
+
+  const [classId, setClassId] = useState<number>(0);
+
+  const [showAddClass, setShowAddClass] = useState(false);
+  const [newClassName, setNewClassName] = useState("");
+
+  const [newClassColor, setNewClassColor] = useState(
+    "bg-blue-200 border-blue-400"
+  );
+
+  const classColors = [
+    {
+      name: "Blue",
+      value: "bg-blue-200 border-blue-400",
+      preview: "bg-blue-300",
+    },
+    {
+      name: "Purple",
+      value: "bg-purple-200 border-purple-400",
+      preview: "bg-purple-300",
+    },
+    {
+      name: "Green",
+      value: "bg-green-200 border-green-400",
+      preview: "bg-green-300",
+    },
+    {
+      name: "Pink",
+      value: "bg-pink-200 border-pink-400",
+      preview: "bg-pink-300",
+    },
+    {
+      name: "Yellow",
+      value: "bg-yellow-200 border-yellow-400",
+      preview: "bg-yellow-300",
+    },
+    {
+      name: "Orange",
+      value: "bg-orange-200 border-orange-400",
+      preview: "bg-orange-300",
+    },
+  ];
+
+  const handleAddClass = async () => {
+    if (!newClassName.trim()) return;
+
+    const { data, error } = await supabase
+      .from("classes")
+      .insert({
+        name: newClassName.trim(),
+        color_classes: newClassColor,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error adding class:", error);
+      return;
+    }
+
+    const newClass = addClass({
+      id: data.id,
+      name: data.name,
+      colorClasses: data.color_classes,
+    });
+
+    setClassId(newClass.id);
+
+    setNewClassName("");
+    setShowAddClass(false);
+  };
+
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+
+    setFormError("");
+
+    if (!assignmentName.trim()) {
+      setFormError("Please enter an assignment name.");
+      return;
+    }
+
+    if (!directions.trim()) {
+      setFormError(
+        "Please add assignment directions so HeadStart can generate your plan."
+      );
+      return;
+    }
+
+    if (!dueDate) {
+      setFormError("Please select a due date.");
+      return;
+    }
+
+    if (!classId) {
+      setFormError("Please select a class.");
+      return;
+    }
+
+    const selectedClass = classes.find(
+      (classInfo) => classInfo.id === classId
+    );
+
+    const pendingAssignment = {
+      title: assignmentName.trim(),
+      course: selectedClass?.name ?? "",
+      classId,
+      directions: directions.trim(),
+      availableFrom:
+        availableFrom || new Date().toISOString().split("T")[0],
+      dueDate,
+    };
+
+    sessionStorage.setItem(
+      "pendingAssignment",
+      JSON.stringify(pendingAssignment)
+    );
+
+    router.push("/assignments/plan");
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
       <div className="mx-auto max-w-2xl rounded-2xl bg-white p-8 shadow-sm">
-        <h1 className="text-3xl font-bold">Create Assignment</h1>
+        <h1 className="text-3xl font-bold">
+          Create Assignment
+        </h1>
 
         <p className="mt-2 text-gray-600">
-          Add your assignment details and Headstart will build a plan for you.
+          Add your assignment details and HeadStart will build a plan for you.
         </p>
 
-        <form className="mt-8 space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+          className="mt-8 space-y-6"
+        >
+          {/* Assignment Name */}
           <div>
             <label className="mb-2 block font-medium">
               Assignment Name
@@ -16,11 +166,100 @@ export default function NewAssignmentPage() {
 
             <input
               type="text"
-              placeholder="Research Paper"
+              placeholder="Assignment Name"
+              value={assignmentName}
+              onChange={(event) =>
+                setAssignmentName(event.target.value)
+              }
+              required
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
             />
           </div>
 
+          {/* Class */}
+          <div>
+            <label className="mb-2 block font-medium">
+              Class
+            </label>
+
+            <select
+              value={classId}
+              onChange={(event) =>
+                setClassId(Number(event.target.value))
+              }
+              required
+              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+            >
+              <option value={0} disabled>
+                Choose a class
+              </option>
+
+              {classes.map((classInfo) => (
+                <option
+                  key={classInfo.id}
+                  value={classInfo.id}
+                >
+                  {classInfo.name}
+                </option>
+              ))}
+            </select>
+
+            <button
+              type="button"
+              onClick={() =>
+                setShowAddClass(!showAddClass)
+              }
+              className="mt-2 text-sm font-medium text-gray-600 hover:text-black"
+            >
+              {showAddClass ? "Cancel" : "+ Add a class"}
+            </button>
+
+            {showAddClass && (
+              <div className="mt-3 rounded-xl border border-gray-200 p-4">
+                <input
+                  type="text"
+                  value={newClassName}
+                  onChange={(event) =>
+                    setNewClassName(event.target.value)
+                  }
+                  placeholder="e.g. COP 4600"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3"
+                />
+
+                <p className="mt-4 text-sm font-medium text-gray-600">
+                  Class color
+                </p>
+
+                <div className="mt-2 flex gap-3">
+                  {classColors.map((color) => (
+                    <button
+                      key={color.name}
+                      type="button"
+                      onClick={() =>
+                        setNewClassColor(color.value)
+                      }
+                      aria-label={`Choose ${color.name}`}
+                      className={`h-8 w-8 rounded-full ${color.preview} ${
+                        newClassColor === color.value
+                          ? "ring-2 ring-black ring-offset-2"
+                          : ""
+                      }`}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleAddClass}
+                  className="mt-4 w-full rounded-lg bg-black px-4 py-3 font-medium text-white"
+                >
+                  Add Class
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Assignment Directions */}
           <div>
             <label className="mb-2 block font-medium">
               Assignment Directions
@@ -29,10 +268,15 @@ export default function NewAssignmentPage() {
             <textarea
               placeholder="Paste your assignment instructions here..."
               rows={7}
+              value={directions}
+              onChange={(event) =>
+                setDirections(event.target.value)
+              }
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
             />
           </div>
 
+          {/* Available From */}
           <div>
             <label className="mb-2 block font-medium">
               Available From
@@ -40,10 +284,19 @@ export default function NewAssignmentPage() {
 
             <input
               type="date"
+              value={availableFrom}
+              onChange={(event) =>
+                setAvailableFrom(event.target.value)
+              }
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
             />
+
+            <p className="mt-1 text-sm text-gray-500">
+              Optional. If left blank, HeadStart will plan from today.
+            </p>
           </div>
 
+          {/* Due Date */}
           <div>
             <label className="mb-2 block font-medium">
               Due Date
@@ -51,10 +304,16 @@ export default function NewAssignmentPage() {
 
             <input
               type="datetime-local"
+              value={dueDate}
+              onChange={(event) =>
+                setDueDate(event.target.value)
+              }
+              required
               className="w-full rounded-lg border border-gray-300 px-4 py-3"
             />
           </div>
 
+          {/* Assignment File */}
           <div>
             <label className="mb-2 block font-medium">
               Assignment File
@@ -66,6 +325,7 @@ export default function NewAssignmentPage() {
             />
           </div>
 
+          {/* Rubric */}
           <div>
             <label className="mb-2 block font-medium">
               Rubric
@@ -80,6 +340,12 @@ export default function NewAssignmentPage() {
               Optional
             </p>
           </div>
+
+          {formError && (
+            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {formError}
+            </div>
+          )}
 
           <button
             type="submit"
