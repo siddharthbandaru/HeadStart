@@ -1,17 +1,45 @@
+
 "use client";
 
 import { supabase } from "@/lib/supabase";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Love_Ya_Like_A_Sister, Itim } from "next/font/google";
 import { useHeadstart } from "../../context/HeadstartContext";
+
+const loveYaLikeASister = Love_Ya_Like_A_Sister({
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const itim = Itim({
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const notebookBackground = {
+  backgroundColor: "#F0EEE9",
+  backgroundImage:
+    "repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, #8db5c7a7 35px, #8db5c7a7 36px), linear-gradient(to right, transparent 115px, #E44B4B 115px, #E44B4B 116px, transparent 116px)",
+};
+
+const inputStyle =
+  "w-full rounded-lg border border-white/40 bg-white/30 px-4 py-3 text-[18px] text-black outline-none transition focus:border-[#2573B8] focus:bg-white/40";
+
+const labelStyle = "mb-2 block text-[20px] text-black";
+
+const classColors = [
+  { name: "Blue", value: "#8DB5C7" },
+  { name: "Purple", value: "#B8A3D9" },
+  { name: "Green", value: "#A8CFA8" },
+  { name: "Pink", value: "#E8A6C9" },
+  { name: "Yellow", value: "#E8D77D" },
+  { name: "Orange", value: "#E8B58A" },
+];
 
 export default function NewAssignmentPage() {
   const router = useRouter();
-
-  const {
-    addClass,
-    classes,
-  } = useHeadstart();
+  const { addClass, classes } = useHeadstart();
 
   const [formError, setFormError] = useState("");
 
@@ -24,43 +52,7 @@ export default function NewAssignmentPage() {
 
   const [showAddClass, setShowAddClass] = useState(false);
   const [newClassName, setNewClassName] = useState("");
-
-  const [newClassColor, setNewClassColor] = useState(
-    "bg-blue-200 border-blue-400"
-  );
-
-  const classColors = [
-    {
-      name: "Blue",
-      value: "bg-blue-200 border-blue-400",
-      preview: "bg-blue-300",
-    },
-    {
-      name: "Purple",
-      value: "bg-purple-200 border-purple-400",
-      preview: "bg-purple-300",
-    },
-    {
-      name: "Green",
-      value: "bg-green-200 border-green-400",
-      preview: "bg-green-300",
-    },
-    {
-      name: "Pink",
-      value: "bg-pink-200 border-pink-400",
-      preview: "bg-pink-300",
-    },
-    {
-      name: "Yellow",
-      value: "bg-yellow-200 border-yellow-400",
-      preview: "bg-yellow-300",
-    },
-    {
-      name: "Orange",
-      value: "bg-orange-200 border-orange-400",
-      preview: "bg-orange-300",
-    },
-  ];
+  const [newClassColor, setNewClassColor] = useState("#8DB5C7");
 
   const handleAddClass = async () => {
     if (!newClassName.trim()) return;
@@ -76,6 +68,7 @@ export default function NewAssignmentPage() {
 
     if (error) {
       console.error("Error adding class:", error);
+      setFormError("Could not add class. Please try again.");
       return;
     }
 
@@ -86,16 +79,15 @@ export default function NewAssignmentPage() {
     });
 
     setClassId(newClass.id);
-
     setNewClassName("");
     setShowAddClass(false);
+    setFormError("");
   };
 
   const handleSubmit = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
-
     setFormError("");
 
     if (!assignmentName.trim()) {
@@ -139,32 +131,44 @@ export default function NewAssignmentPage() {
       JSON.stringify(pendingAssignment)
     );
 
-    router.push("/assignments/plan");
+    router.push("/assignments/plan", { scroll: true });
   };
 
+  const selectedClass = classes.find(
+    (classInfo) => classInfo.id === classId
+  );
+
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-12">
-      <div className="mx-auto max-w-2xl rounded-2xl bg-white p-8 shadow-sm">
-        <h1 className="text-3xl font-bold">
+    <main
+      className={`min-h-screen px-6 py-12 ${itim.className}`}
+      style={notebookBackground}
+    >
+      <div className="mx-auto max-w-2xl">
+        <h1
+          className={`${loveYaLikeASister.className} text-[44px] leading-tight text-black`}
+        >
           Create Assignment
         </h1>
 
-        <p className="mt-2 text-gray-600">
-          Add your assignment details and HeadStart will build a plan for you.
+        <p className="mt-2 text-[19px] text-gray-600">
+          Add your assignment details and Head
+          <span className="text-[#2573B8]">Start</span> will build a plan
+          for you.
         </p>
 
         <form
           onSubmit={handleSubmit}
           noValidate
-          className="mt-8 space-y-6"
+          className="mt-6 space-y-6 rounded-xl border border-white/40 bg-white/20 p-6 backdrop-blur-[0.75px] shadow-md md:p-8"
         >
           {/* Assignment Name */}
           <div>
-            <label className="mb-2 block font-medium">
+            <label htmlFor="assignment-name" className={labelStyle}>
               Assignment Name
             </label>
 
             <input
+              id="assignment-name"
               type="text"
               placeholder="Assignment Name"
               value={assignmentName}
@@ -172,23 +176,27 @@ export default function NewAssignmentPage() {
                 setAssignmentName(event.target.value)
               }
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className={inputStyle}
             />
           </div>
 
           {/* Class */}
           <div>
-            <label className="mb-2 block font-medium">
+            <label htmlFor="assignment-class" className={labelStyle}>
               Class
             </label>
 
             <select
+              id="assignment-class"
               value={classId}
               onChange={(event) =>
                 setClassId(Number(event.target.value))
               }
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className={inputStyle}
+              style={{
+                color: selectedClass?.colorClasses ?? "#6B7280",
+              }}
             >
               <option value={0} disabled>
                 Choose a class
@@ -198,6 +206,7 @@ export default function NewAssignmentPage() {
                 <option
                   key={classInfo.id}
                   value={classInfo.id}
+                  style={{ color: classInfo.colorClasses }}
                 >
                   {classInfo.name}
                 </option>
@@ -206,44 +215,47 @@ export default function NewAssignmentPage() {
 
             <button
               type="button"
-              onClick={() =>
-                setShowAddClass(!showAddClass)
-              }
-              className="mt-2 text-sm font-medium text-gray-600 hover:text-black"
+              onClick={() => setShowAddClass(!showAddClass)}
+              className="mx-4 text-[17px] text-[#2573B8] hover:underline"
             >
               {showAddClass ? "Cancel" : "+ Add a class"}
             </button>
 
             {showAddClass && (
-              <div className="mt-3 rounded-xl border border-gray-200 p-4">
+              <div className="mt-4 rounded-xl border border-white/40 bg-white/20 p-4 backdrop-blur-[0.75px] shadow-md">
+                <label htmlFor="new-class-name" className={labelStyle}>
+                  Class Name
+                </label>
+
                 <input
+                  id="new-class-name"
                   type="text"
                   value={newClassName}
                   onChange={(event) =>
                     setNewClassName(event.target.value)
                   }
                   placeholder="e.g. COP 4600"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3"
+                  className={inputStyle}
                 />
 
-                <p className="mt-4 text-sm font-medium text-gray-600">
-                  Class color
+                <p className="mt-4 text-[18px] text-gray-600">
+                  Class Color
                 </p>
 
-                <div className="mt-2 flex gap-3">
+                <div className="mt-3 flex flex-wrap gap-3">
                   {classColors.map((color) => (
                     <button
                       key={color.name}
                       type="button"
-                      onClick={() =>
-                        setNewClassColor(color.value)
-                      }
+                      onClick={() => setNewClassColor(color.value)}
                       aria-label={`Choose ${color.name}`}
-                      className={`h-8 w-8 rounded-full ${color.preview} ${
+                      aria-pressed={newClassColor === color.value}
+                      className={`h-9 w-9 rounded-full border-2 transition ${
                         newClassColor === color.value
-                          ? "ring-2 ring-black ring-offset-2"
-                          : ""
+                          ? "border-black ring-2 ring-black/30 ring-offset-2"
+                          : "border-white/70"
                       }`}
+                      style={{ backgroundColor: color.value }}
                     />
                   ))}
                 </div>
@@ -251,7 +263,7 @@ export default function NewAssignmentPage() {
                 <button
                   type="button"
                   onClick={handleAddClass}
-                  className="mt-4 w-full rounded-lg bg-black px-4 py-3 font-medium text-white"
+                  className="mt-5 w-full rounded-lg bg-[#2573B8] px-4 py-3 text-[19px] text-white transition hover:bg-[#1c609c]"
                 >
                   Add Class
                 </button>
@@ -261,95 +273,103 @@ export default function NewAssignmentPage() {
 
           {/* Assignment Directions */}
           <div>
-            <label className="mb-2 block font-medium">
+            <label
+              htmlFor="assignment-directions"
+              className={labelStyle}
+            >
               Assignment Directions
             </label>
 
             <textarea
+              id="assignment-directions"
               placeholder="Paste your assignment instructions here..."
               rows={7}
               value={directions}
               onChange={(event) =>
                 setDirections(event.target.value)
               }
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className={`${inputStyle} resize-y`}
             />
           </div>
 
           {/* Available From */}
           <div>
-            <label className="mb-2 block font-medium">
+            <label htmlFor="available-from" className={labelStyle}>
               Available From
             </label>
 
             <input
+              id="available-from"
               type="date"
               value={availableFrom}
               onChange={(event) =>
                 setAvailableFrom(event.target.value)
               }
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className={inputStyle}
             />
 
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mx-4 text-[16px] text-gray-500">
               Optional. If left blank, HeadStart will plan from today.
             </p>
           </div>
 
           {/* Due Date */}
           <div>
-            <label className="mb-2 block font-medium">
+            <label htmlFor="due-date" className={labelStyle}>
               Due Date
             </label>
 
             <input
+              id="due-date"
               type="datetime-local"
               value={dueDate}
               onChange={(event) =>
                 setDueDate(event.target.value)
               }
               required
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className={inputStyle}
             />
           </div>
 
           {/* Assignment File */}
           <div>
-            <label className="mb-2 block font-medium">
+            <label htmlFor="assignment-file" className={labelStyle}>
               Assignment File
             </label>
 
             <input
+              id="assignment-file"
               type="file"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className={`${inputStyle} file:mr-4 file:rounded-lg file:border-0 file:bg-white/60 file:px-3 file:py-2 file:text-[16px] file:text-black`}
             />
           </div>
 
           {/* Rubric */}
           <div>
-            <label className="mb-2 block font-medium">
+            <label htmlFor="assignment-rubric" className={labelStyle}>
               Rubric
             </label>
 
             <input
+              id="assignment-rubric"
               type="file"
-              className="w-full rounded-lg border border-gray-300 px-4 py-3"
+              className={`${inputStyle} file:mr-4 file:rounded-lg file:border-0 file:bg-white/60 file:px-3 file:py-2 file:text-[16px] file:text-black`}
             />
 
-            <p className="mt-1 text-sm text-gray-500">
-              Optional
-            </p>
           </div>
 
           {formError && (
-            <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div
+              role="alert"
+              className="rounded-lg border border-[#9c2133]/30 bg-white/30 px-4 py-3 text-[17px] text-[#9c2133]"
+            >
               {formError}
             </div>
           )}
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-black px-6 py-3 font-medium text-white"
+            className="w-full rounded-lg bg-[#2573B8] px-6 py-3 text-[21px] text-white transition hover:bg-[#1c609c]"
           >
             Generate Plan
           </button>
