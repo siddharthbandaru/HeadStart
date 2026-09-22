@@ -19,9 +19,13 @@ export default function AssignmentsPage() {
   } = useHeadstart();
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-12">
-      <div className="mx-auto max-w-4xl">
-        <div className="flex items-center justify-between">
+    <main className="min-h-screen"
+      style={{
+        backgroundColor: "#F0EEE9",
+        backgroundImage: "repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, #8db5c7a7 35px, #8DB5C7a7 36px), linear-gradient(to right, transparent 115px, #E44B4B 115px, #E44B4B 116px, transparent 116px"
+    }}>
+      <div className="mx-auto max-w-4xl px-6 py-12">
+        <div className="relative main-h-screen ml-28">
           <div>
             <h1 className="text-4xl font-bold">Assignments</h1>
 
