@@ -66,9 +66,20 @@ export default function ClassesPage() {
   const handleAddClass = async () => {
     if (!newClassName.trim()) return;
 
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.error("User must be logged in.");
+      return;
+    }
+
     const { data, error } = await supabase
       .from("classes")
       .insert({
+        user_id: user.id,
         name: newClassName.trim(),
         color_classes: newClassColor,
       })

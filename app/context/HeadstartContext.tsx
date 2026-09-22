@@ -11,9 +11,6 @@ import {
 } from "react";
 
 import {
-  assignments as initialAssignments,
-  checkpoints as initialCheckpoints,
-  classes as initialClasses,
   Assignment,
   Checkpoint,
   ClassInfo,
@@ -70,97 +67,137 @@ export function HeadstartProvider({
   children: ReactNode;
 }) {
   const [assignments, setAssignments] =
-    useState<Assignment[]>(initialAssignments);
+    useState<Assignment[]>([]);
 
   const [classes, setClasses] =
-    useState<ClassInfo[]>(initialClasses);
+    useState<ClassInfo[]>([]);
 
   const [checkpoints, setCheckpoints] =
-    useState<Checkpoint[]>(initialCheckpoints);
+    useState<Checkpoint[]>([]);
 
   const [hasLoaded, setHasLoaded] =
     useState(false);
 
+  const getCurrentUserId = async () => {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
 
-  useEffect(() => {
-    const loadCheckpoints = async () => {
-    const { data, error } = await supabase
-      .from("checkpoints")
-      .select("*")
-      .order("id");
-
-    if (error) {
-      console.error("Error loading checkpoints:", error);
-      return;
+    if (error || !user) {
+      throw new Error("User must be logged in.");
     }
 
-    const formattedCheckpoints: Checkpoint[] = data.map(
-      (checkpoint) => ({
-        id: Number(checkpoint.id),
-        assignmentId: Number(checkpoint.assignment_id),
-        title: checkpoint.title,
-        date: checkpoint.date,
-        estimatedMinutes: checkpoint.estimated_minutes,
-        completed: checkpoint.completed,
-      })
-    );
+    return user.id;
+  };  
 
-    setCheckpoints(formattedCheckpoints);
-  };
+  useEffect(() => {
+    const loadData = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-  loadCheckpoints();
-
-    const loadClasses = async () => {
-      const { data, error } = await supabase
-        .from("classes")
-        .select("*")
-        .order("id");
-
-      if (error) {
-        console.error("Error loading classes:", error);
+      if (!user) {
+        setClasses([]);
+        setAssignments([]);
+        setCheckpoints([]);
+        setHasLoaded(true);
         return;
       }
 
-      const formattedClasses: ClassInfo[] = data.map((classInfo) => ({
-        id: classInfo.id,
-        name: classInfo.name,
-        colorClasses: classInfo.color_classes,
-      }));
+      const [
+        classesResult,
+        assignmentsResult,
+        checkpointsResult,
+      ] = await Promise.all([
+        supabase
+          .from("classes")
+          .select("*")
+          .order("id"),
 
-      setClasses(formattedClasses);
-    };
+        supabase
+          .from("assignments")
+          .select("*")
+          .order("id"),
 
-    loadClasses();
+        supabase
+          .from("checkpoints")
+          .select("*")
+          .order("id"),
+      ]);
 
-    const loadAssignments = async () => {
-      const { data, error } = await supabase
-        .from("assignments")
-        .select("*")
-        .order("id");
-              
-      if (error) {
-        console.error("Error loading assignments:", error);
-        return;
+      if (classesResult.error) {
+        console.error(
+          "Error loading classes:",
+          classesResult.error
+        );
+      } else {
+        const formattedClasses: ClassInfo[] =
+          classesResult.data.map((classInfo) => ({
+            id: Number(classInfo.id),
+            name: classInfo.name,
+            colorClasses: classInfo.color_classes,
+          }));
+
+        setClasses(formattedClasses);
       }
 
-      const formattedAssignments: Assignment[] = data.map(
-        (assignment) => ({
-          id: Number(assignment.id),
-          title: assignment.title,
-          classId: Number(assignment.class_id),
-          directions: assignment.directions ?? "",
-          availableFrom: assignment.available_from ?? "",
-          dueDate: assignment.due_date?.split("T")[0] ?? "",
-        })
-      );
+      if (assignmentsResult.error) {
+        console.error(
+          "Error loading assignments:",
+          assignmentsResult.error
+        );
+      } else {
+        const formattedAssignments: Assignment[] =
+          assignmentsResult.data.map((assignment) => ({
+            id: Number(assignment.id),
+            title: assignment.title,
+            classId: Number(assignment.class_id),
+            directions: assignment.directions ?? "",
+            availableFrom: assignment.available_from ?? "",
+            dueDate:
+              assignment.due_date?.split("T")[0] ?? "",
+          }));
 
-      setAssignments(formattedAssignments);
+        setAssignments(formattedAssignments);
+      }
+
+      if (checkpointsResult.error) {
+        console.error(
+          "Error loading checkpoints:",
+          checkpointsResult.error
+        );
+      } else {
+        const formattedCheckpoints: Checkpoint[] =
+          checkpointsResult.data.map((checkpoint) => ({
+            id: Number(checkpoint.id),
+            assignmentId: Number(
+              checkpoint.assignment_id
+            ),
+            title: checkpoint.title,
+            date: checkpoint.date,
+            estimatedMinutes:
+              checkpoint.estimated_minutes,
+            completed: checkpoint.completed,
+          }));
+
+        setCheckpoints(formattedCheckpoints);
+      }
+
+      setHasLoaded(true);
     };
 
-    loadAssignments();
+    loadData();
 
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      loadData();
+    });
 
-    setHasLoaded(true);
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
 
@@ -278,7 +315,10 @@ export function HeadstartProvider({
   const addCheckpoints = async (
     newCheckpoints: NewCheckpoint[]
   ) => {
+    const userId = await getCurrentUserId();
+
     const rows = newCheckpoints.map((checkpoint) => ({
+      user_id: userId,
       assignment_id: checkpoint.assignmentId,
       title: checkpoint.title,
       date: checkpoint.date,
