@@ -244,7 +244,7 @@ export default function Home() {
           <div className={`${itim.className} flex items-center gap-3 my-3 text-[24px]`}>
           <Link
             href="/assignments/new"
-            className="rounded-lg border border-white/40 bg-black/51 px-3 py-1 text-[#F0EEE9] shadow-md backdrop-blur-md transition hover:bg-white/60 hover:shadow-lg text-[24px]"
+            className="rounded-lg border border-white/40 bg-black/20 px-3 py-1 text-[#F0EEE9] shadow-md backdrop-blur-[0.75px] transition hover:bg-white/40 hover:text-black/40 hover:shadow-lg text-[24px]"
           >
             + new assignment
           </Link>
@@ -274,10 +274,10 @@ export default function Home() {
                 return (
                 <div
                   key={checkpoint.id}
-                  className={`flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-2 shadow-md backdrop-blur-md transition ${
+                  className={`flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-2 shadow-md backdrop-blur-[0.75px] transition ${
                     checkpoint.completed
                       ? "border-gray-300 bg-gray-100/60"
-                      : "border-white/40 bg-white/40"}`}
+                      : "border-white/40 bg-white/20"}`}
                  >
                   <div className="flex items-center gap-3">
                     <input
@@ -310,7 +310,7 @@ export default function Home() {
                           );
 
                           completionTimers.current.delete(id);
-                        }, 1000);
+                        }, 2000);
 
                         completionTimers.current.set(id, timer);
                       }}
@@ -409,7 +409,7 @@ export default function Home() {
             <Link
               key={assignment.id}
               href={`/assignments/${assignment.id}`}
-              className="flex min-h-32 flex-col justify-between rounded-lg  px-4 py-1 shadow-md backdrop-blur-md transition hover:shadow-lg"
+              className="flex min-h-32 flex-col justify-between rounded-lg  px-4 py-1 shadow-md backdrop-blur-[0.75px] transition hover:shadow-lg"
                     style={{
                     backgroundColor: classInfo?.colorClasses
                       ? `${classInfo.colorClasses}2c`
@@ -440,7 +440,7 @@ export default function Home() {
                 <span>{progress}%  Complete</span>
               </div>
 
-              <div className="h-3 w-full mb-2 rounded-full overflow-hidden rounded-full bg-white/60">
+              <div className="h-3 w-full mb-2 rounded-full overflow-hidden rounded-full bg-white/20">
                 <div
                   className="h-full rounded-full bg-[#2573B8] transition-all"
                   style={{ width: `${progress}%` }}
@@ -472,7 +472,7 @@ export default function Home() {
            </h1>
         </div>
 
-        <section className="w-70/100 rounded-lg border border-white/40 bg-white/40 px-4 mx-10 my-4 py-1 text-[#000000] shadow-md backdrop-blur-md transition hover:bg-white/60 hover:shadow">
+        <section className="w-70/100 rounded-lg border border-white/40 bg-white/20 px-4 mx-10 my-4 py-1 text-[#000000] shadow-md backdrop-blur-[0.75px] transition hover:bg-white/40 hover:shadow">
           <div className={`${itim.className} flex items-start justify-between`}>
 
             <h2 className="mt-2 text-2xl">
@@ -501,7 +501,7 @@ export default function Home() {
         </section>
         </div>
 
-          <aside className="hidden lg:block absolute -right-7 -top-4 w-[24%] h-full">
+          <aside className="hidden lg:block absolute -right-7 -top-4 w-[25%] h-full">
             <div className="sticky top-6 space-y-6">
 
               <section className="flex min-h-64 flex-col rounded-sm bg-[#EEF078] p-5 shadow-lg">
@@ -523,10 +523,10 @@ export default function Home() {
                         <label
                         
                           key={checkpoint.id}
-                          className={`flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-1 shadow-md backdrop-blur-md transition ${
+                          className={`flex w-full items-center justify-between gap-3 rounded-lg border px-4 py-1 shadow-md backdrop-blur-[0.75px] transition ${
                             checkpoint.completed
                               ? "border-gray-300 bg-gray-100/60"
-                              : "border-white/40 bg-white/40"}`}
+                              : "border-white/40 bg-white/20"}`}
                         >
                     <div className="flex min-w-0 w-full items-center gap-3">
                       <input
@@ -559,7 +559,7 @@ export default function Home() {
                             );
 
                             completionTimers.current.delete(id);
-                          }, 1000);
+                          }, 2000);
 
                           completionTimers.current.set(id, timer);
                         }}
@@ -640,7 +640,7 @@ export default function Home() {
            </h1>
         </div>
 
-        <section className="w-100/100 rounded-lg border border-white/40 bg-white/40 px-4 mx-10 my-4 py-1 text-[#000000] shadow-md backdrop-blur-md transition hover:bg-white/60 hover:shadow">
+        <section className="w-100/100 rounded-lg border border-white/40 bg-white/20 px-4 mx-10 my-4 py-1 text-[#000000] shadow-md backdrop-blur-[0.75px] transition hover:bg-white/40 hover:shadow">
           <div className={`${itim.className} flex items-start justify-between`}>
             <h2 className="mt-1 text-2xl ">
               This Week

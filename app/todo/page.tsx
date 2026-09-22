@@ -1,8 +1,26 @@
+
 "use client";
 
 import Link from "next/link";
 import { useState } from "react";
+import { Love_Ya_Like_A_Sister, Itim } from "next/font/google";
 import { useHeadstart } from "../context/HeadstartContext";
+
+const loveYaLikeASister = Love_Ya_Like_A_Sister({
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const itim = Itim({
+  weight: "400",
+  subsets: ["latin"],
+});
+
+const notebookBackground = {
+  backgroundColor: "#F0EEE9",
+  backgroundImage:
+    "repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, #8db5c7a7 35px, #8db5c7a7 36px), linear-gradient(to right, transparent 115px, #E44B4B 115px, #E44B4B 116px, transparent 116px)",
+};
 
 type TaskStatus = "late" | "today" | "upcoming";
 
@@ -10,7 +28,7 @@ const getTaskStatus = (date: string): TaskStatus => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const taskDate = new Date(`${date}T00:00:00`);
+  const taskDate = new Date(`${date.split("T")[0]}T00:00:00`);
 
   if (taskDate < today) return "late";
   if (taskDate.getTime() === today.getTime()) return "today";
@@ -19,7 +37,9 @@ const getTaskStatus = (date: string): TaskStatus => {
 };
 
 const formatDate = (date: string) => {
-  return new Date(`${date}T00:00:00`).toLocaleDateString("en-US", {
+  return new Date(
+    `${date.split("T")[0]}T00:00:00`
+  ).toLocaleDateString("en-US", {
     month: "long",
     day: "numeric",
   });
@@ -34,6 +54,9 @@ const formatTime = (minutes: number) => {
 
   return `${hours} hr ${mins} min`;
 };
+
+const cardStyle =
+  "rounded-xl border border-white/40 bg-white/20 p-6 backdrop-blur-[0.75px] shadow-md";
 
 export default function TodoPage() {
   const {
@@ -53,34 +76,43 @@ export default function TodoPage() {
     (checkpoint) => checkpoint.completed
   );
 
-  const statusStyles: Record<TaskStatus, string> = {
-    late: "border-red-300 bg-red-50",
-    today: "border-yellow-300 bg-yellow-50",
-    upcoming: "border-green-300 bg-green-50",
-  };
-
   const statusLabels: Record<TaskStatus, string> = {
     late: "Late",
     today: "Due today",
     upcoming: "Upcoming",
   };
 
+  const statusColors: Record<TaskStatus, string> = {
+    late: "text-[#9c2133]",
+    today: "text-amber-700",
+    upcoming: "text-green-700",
+  };
+
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-12">
+    <main
+      className={`min-h-screen px-6 py-12 ${itim.className}`}
+      style={notebookBackground}
+    >
       <div className="mx-auto max-w-4xl">
+        {/* Heading */}
         <div>
-          <h1 className="text-4xl font-bold">
+          <h1
+            className={`${loveYaLikeASister.className} text-[44px] leading-tight text-black`}
+          >
             To-Do
           </h1>
 
-          <p className="mt-2 text-gray-600">
+          <p className="mt-2 text-[19px] text-gray-600">
             Checkpoints across all your assignments.
           </p>
         </div>
 
-        <div className="mt-8">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">
+        {/* Active tasks */}
+        <section className="mt-8">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <h2
+              className={`${loveYaLikeASister.className} text-[32px] text-black`}
+            >
               Your Tasks
             </h2>
 
@@ -88,9 +120,9 @@ export default function TodoPage() {
               <button
                 type="button"
                 onClick={() =>
-                  setShowCompleted(!showCompleted)
+                  setShowCompleted((current) => !current)
                 }
-                className="text-sm font-medium text-gray-600 hover:text-black"
+                className="text-[17px] text-[#2573B8] hover:underline"
               >
                 {showCompleted
                   ? "Hide completed"
@@ -101,75 +133,75 @@ export default function TodoPage() {
 
           <div className="mt-4 space-y-4">
             {incompleteTasks.map((checkpoint) => {
-              const status = getTaskStatus(
-                checkpoint.date
-              );
+              const status = getTaskStatus(checkpoint.date);
 
               const assignment = assignments.find(
-                (assignment) =>
-                  assignment.id === checkpoint.assignmentId
+                (item) => item.id === checkpoint.assignmentId
               );
 
               const classInfo = classes.find(
-                (classInfo) =>
-                  classInfo.id === assignment?.classId
+                (item) => item.id === assignment?.classId
               );
 
               return (
                 <div
                   key={checkpoint.id}
-                  className={`flex items-start gap-4 rounded-2xl border p-6 transition hover:shadow-sm ${statusStyles[status]}`}
+                  className={`flex items-start gap-4 ${cardStyle} transition hover:bg-white/30`}
                 >
                   <button
                     type="button"
                     onClick={() =>
                       toggleCheckpoint(checkpoint.id)
                     }
-                    className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-gray-400 bg-white transition hover:border-black"
+                    className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-[#2573B8] bg-white/30 transition hover:bg-[#2573B8]/10"
                     aria-label={`Mark ${checkpoint.title} complete`}
                   />
 
                   <Link
-                    href={
-                      "/assignments/" +
-                      checkpoint.assignmentId
-                    }
-                    className="flex-1"
+                    href={`/assignments/${checkpoint.assignmentId}`}
+                    className="min-w-0 flex-1"
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="text-sm font-medium text-gray-500">
+                          <p className="text-[17px] text-gray-600">
                             {formatDate(checkpoint.date)}
                           </p>
 
                           {classInfo && (
                             <span
-                              className={`rounded-full border px-2 py-1 text-xs font-medium ${classInfo.colorClasses}`}
+                              className="rounded-full border px-3 py-1 text-[15px]"
+                              style={{
+                                color: classInfo.colorClasses,
+                                borderColor: classInfo.colorClasses,
+                                backgroundColor: `${classInfo.colorClasses}1a`,
+                              }}
                             >
                               {classInfo.name}
                             </span>
                           )}
                         </div>
 
-                        <h3 className="mt-2 text-xl font-semibold">
+                        <h3
+                          className={`${loveYaLikeASister.className} mt-2 break-words text-[28px] leading-tight text-black`}
+                        >
                           {checkpoint.title}
                         </h3>
 
-                        <p className="mt-1 text-gray-600">
+                        <p className="mt-1 text-[18px] text-gray-600">
                           {assignment?.title ??
                             "Unknown assignment"}
                         </p>
 
-                        <p className="mt-2 text-sm text-gray-500">
+                        <p className="mt-2 text-[16px] text-gray-500">
                           Estimated time:{" "}
-                          {formatTime(
-                            checkpoint.estimatedMinutes
-                          )}
+                          {formatTime(checkpoint.estimatedMinutes)}
                         </p>
                       </div>
 
-                      <span className="whitespace-nowrap text-sm font-medium text-gray-600">
+                      <span
+                        className={`whitespace-nowrap text-[16px] ${statusColors[status]}`}
+                      >
                         {statusLabels[status]}
                       </span>
                     </div>
@@ -179,110 +211,109 @@ export default function TodoPage() {
             })}
 
             {incompleteTasks.length === 0 && (
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 text-center">
-                <p className="font-medium">
+              <div className={`${cardStyle} text-center`}>
+                <h3
+                  className={`${loveYaLikeASister.className} text-[30px]`}
+                >
                   You&apos;re all caught up!
-                </p>
+                </h3>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-2 text-[18px] text-gray-600">
                   No active checkpoints right now.
                 </p>
               </div>
             )}
           </div>
-        </div>
+        </section>
 
-        {showCompleted &&
-          completedTasks.length > 0 && (
-            <div className="mt-10 border-t border-gray-200 pt-8">
-              <h2 className="text-xl font-semibold text-gray-500">
-                Completed
-              </h2>
+        {/* Completed tasks */}
+        {showCompleted && completedTasks.length > 0 && (
+          <section className="mt-10">
+            <h2
+              className={`${loveYaLikeASister.className} text-[32px] text-black`}
+            >
+              Completed
+            </h2>
 
-              <div className="mt-4 space-y-4">
-                {completedTasks.map((checkpoint) => {
-                  const assignment =
-                    assignments.find(
-                      (assignment) =>
-                        assignment.id ===
-                        checkpoint.assignmentId
-                    );
+            <div className="mt-4 space-y-4">
+              {completedTasks.map((checkpoint) => {
+                const assignment = assignments.find(
+                  (item) => item.id === checkpoint.assignmentId
+                );
 
-                  const classInfo = classes.find(
-                    (classInfo) =>
-                      classInfo.id ===
-                      assignment?.classId
-                  );
+                const classInfo = classes.find(
+                  (item) => item.id === assignment?.classId
+                );
 
-                  return (
-                    <div
-                      key={checkpoint.id}
-                      className="flex items-start gap-4 rounded-2xl border border-gray-200 bg-gray-100 p-6 opacity-60 transition hover:opacity-80"
+                return (
+                  <div
+                    key={checkpoint.id}
+                    className={`flex items-start gap-4 ${cardStyle} transition hover:bg-white/30`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        toggleCheckpoint(checkpoint.id)
+                      }
+                      className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#2573B8] text-white transition hover:bg-[#1c609c]"
+                      aria-label={`Mark ${checkpoint.title} incomplete`}
                     >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          toggleCheckpoint(checkpoint.id)
-                        }
-                        className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-black bg-black text-white"
-                        aria-label={`Mark ${checkpoint.title} incomplete`}
-                      >
-                        ✓
-                      </button>
+                      ✓
+                    </button>
 
-                      <Link
-                        href={
-                          "/assignments/" +
-                          checkpoint.assignmentId
-                        }
-                        className="flex-1"
-                      >
-                        <div className="flex items-start justify-between gap-4">
-                          <div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-sm font-medium text-gray-400">
-                                {formatDate(
-                                  checkpoint.date
-                                )}
-                              </p>
-
-                              {classInfo && (
-                                <span
-                                  className={`rounded-full border px-2 py-1 text-xs font-medium ${classInfo.colorClasses}`}
-                                >
-                                  {classInfo.name}
-                                </span>
-                              )}
-                            </div>
-
-                            <h3 className="mt-2 text-xl font-semibold text-gray-500 line-through">
-                              {checkpoint.title}
-                            </h3>
-
-                            <p className="mt-1 text-gray-500">
-                              {assignment?.title ??
-                                "Unknown assignment"}
+                    <Link
+                      href={`/assignments/${checkpoint.assignmentId}`}
+                      className="min-w-0 flex-1"
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-4">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-[17px] text-gray-500">
+                              {formatDate(checkpoint.date)}
                             </p>
 
-                            <p className="mt-2 text-sm text-gray-400">
-                              Estimated time:{" "}
-                              {formatTime(
-                                checkpoint.estimatedMinutes
-                              )}
-                            </p>
+                            {classInfo && (
+                              <span
+                                className="rounded-full border px-3 py-1 text-[15px]"
+                                style={{
+                                  color: classInfo.colorClasses,
+                                  borderColor: classInfo.colorClasses,
+                                  backgroundColor: `${classInfo.colorClasses}1a`,
+                                }}
+                              >
+                                {classInfo.name}
+                              </span>
+                            )}
                           </div>
 
-                          <span className="whitespace-nowrap text-sm font-medium text-gray-500">
-                            Completed
-                          </span>
+                          <h3
+                            className={`${loveYaLikeASister.className} mt-2 break-words text-[28px] leading-tight text-gray-500 line-through`}
+                          >
+                            {checkpoint.title}
+                          </h3>
+
+                          <p className="mt-1 text-[18px] text-gray-500">
+                            {assignment?.title ??
+                              "Unknown assignment"}
+                          </p>
+
+                          <p className="mt-2 text-[16px] text-gray-500">
+                            Estimated time:{" "}
+                            {formatTime(checkpoint.estimatedMinutes)}
+                          </p>
                         </div>
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
+
+                        <span className="whitespace-nowrap text-[16px] text-gray-500">
+                          Completed
+                        </span>
+                      </div>
+                    </Link>
+                  </div>
+                );
+              })}
             </div>
-          )}
+          </section>
+        )}
       </div>
     </main>
   );

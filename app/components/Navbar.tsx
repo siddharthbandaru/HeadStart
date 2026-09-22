@@ -28,28 +28,28 @@ export default function Navbar() {
 
           <Link
             href="/assignments"
-            className="rounded-lg border border-white/40 bg-white/40 px-3 py-1 text-gray-700 shadow-md backdrop-blur-md transition hover:bg-white/60 hover:shadow-lg"
+            className="rounded-lg border border-white/40 bg-white/20 px-3 py-1 text-gray-700 shadow-md backdrop-blur-[0.75] transition hover:bg-white/40 hover:shadow-lg"
           >
             assignments
           </Link>
 
           <Link
             href="/classes"
-            className="rounded-lg border border-white/40 bg-white/40 px-3 py-1 text-gray-700 shadow-md backdrop-blur-md transition hover:bg-white/60 hover:shadow-lg"
+            className="rounded-lg border border-white/40 bg-white/20 px-3 py-1 text-gray-700 shadow-md backdrop-blur-[0.75] transition hover:bg-white/40 hover:shadow-lg"
           >
             classes
           </Link>
 
 
           <Link href="/todo" 
-          className="rounded-lg border border-white/40 bg-white/40 px-3 py-1 text-gray-700 shadow-md backdrop-blur-md transition hover:bg-white/60 hover:shadow-lg"
+          className="rounded-lg border border-white/40 bg-white/20 px-3 py-1 text-gray-700 shadow-md backdrop-blur-[0.75] transition hover:bg-white/40 hover:shadow-lg"
           >
             to-do
           </Link>
 
           <Link
             href="/calendar"
-            className="rounded-lg border border-white/40 bg-white/40 px-3 py-1 text-gray-700 shadow-md backdrop-blur-md transition hover:bg-white/60 hover:shadow-lg"
+            className="rounded-lg border border-white/40 bg-white/20 px-3 py-1 text-gray-700 shadow-md backdrop-blur-[0.75] transition hover:bg-white/40 hover:shadow-lg"
           >
             calendar
           </Link>

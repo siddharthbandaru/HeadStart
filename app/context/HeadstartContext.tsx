@@ -42,7 +42,8 @@ type HeadstartContextType = {
 
   updateClass: (
     id: number,
-    name: string
+    name: string,
+    color: string
   ) => Promise<void>;
 
   deleteClass: (
@@ -222,31 +223,35 @@ export function HeadstartProvider({
   };
 
   const updateClass = async (
-    id: number,
-    name: string
-  ) => {
-    const { error } = await supabase
-      .from("classes")
-      .update({ name })
-      .eq("id", id);
+  id: number,
+  name: string,
+  color: string
+) => {
+  const { error } = await supabase
+    .from("classes")
+    .update({
+      name,
+      color_classes: color,
+    })
+    .eq("id", id);
 
-    if (error){
-      console.error("Error updating class", error);
-      return;
-    }
-    setClasses(
-      (currentClasses) =>
-        currentClasses.map(
-          (classInfo) =>
-            classInfo.id === id
-              ? {
-                  ...classInfo,
-                  name,
-                }
-              : classInfo
-        )
-    );
-  };
+  if (error) {
+    console.error("Error updating class:", error);
+    throw error;
+  }
+
+  setClasses((currentClasses) =>
+    currentClasses.map((classInfo) =>
+      classInfo.id === id
+        ? {
+            ...classInfo,
+            name,
+            colorClasses: color,
+          }
+        : classInfo
+    )
+  );
+};
 
   const deleteClass = async (
     id: number
