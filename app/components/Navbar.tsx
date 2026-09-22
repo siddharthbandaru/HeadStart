@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import type { User } from "@supabase/supabase-js";
 import { Love_Ya_Like_A_Sister } from "next/font/google";
@@ -18,7 +17,6 @@ const loveYaLikeASister = Love_Ya_Like_A_Sister({
 });
 
 export default function Navbar() {
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -36,12 +34,6 @@ export default function Navbar() {
       authListener.subscription.unsubscribe();
     };
   }, []);
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  }
 
   return (
     <nav className="border-b border-[#8db5c7]" 
@@ -86,12 +78,12 @@ export default function Navbar() {
           </Link>
 
           {user && (
-            <button
-              onClick={handleLogout}
+            <Link
+              href="/account"
               className="rounded-lg border border-white/40 bg-white/20 px-3 py-1 text-gray-700 shadow-md backdrop-blur-[0.75] transition hover:bg-white/40 hover:shadow-lg"
             >
-              log out
-            </button>
+              account
+            </Link>
           )}
         </div>
       </div>
