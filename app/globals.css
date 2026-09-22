@@ -24,3 +24,53 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Main page scrollbar — HeadStart blue */
+html {
+  scrollbar-width: auto;
+  scrollbar-color: #23649d #F5F5F5;
+}
+
+html::-webkit-scrollbar {
+  width: 16px;
+}
+
+html::-webkit-scrollbar-track {
+  background: #F5F5F5;
+  border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb {
+  background: #23649d;
+  border: 3px solid #F5F5F5;
+  border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: #2573B8;
+}
+
+/* Notes scrollbar — pink */
+.notes-scrollbar {
+  scrollbar-width: auto;
+  scrollbar-color: #b064a1 #ffcdf5;
+}
+
+.notes-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.notes-scrollbar::-webkit-scrollbar-track {
+  background: #ffcdf5;
+  border-radius: 999px;
+}
+
+.notes-scrollbar::-webkit-scrollbar-thumb {
+  background: #ffcdf5;
+  border: 2px solid #b064a1;
+  border-radius: 999px;
+}
+
+.notes-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #ab0c79;
+}

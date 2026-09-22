@@ -15,7 +15,7 @@ export default function ClassesPage() {
 
   const [newClassName, setNewClassName] = useState("");
   const [newClassColor, setNewClassColor] = useState(
-    "bg-blue-200 border-blue-400"
+    "#93C5FD"
   );
 
   const [editingClassId, setEditingClassId] =
@@ -142,7 +142,7 @@ export default function ClassesPage() {
                   setNewClassColor(color.value)
                 }
                 aria-label={`Choose ${color.name}`}
-                className={`h-8 w-8 rounded-full" ${
+                className={`h-8 w-8 rounded-full ${
                   newClassColor === color.value
                     ? "ring-2 ring-black ring-offset-2"
                     : ""
@@ -165,7 +165,11 @@ export default function ClassesPage() {
           {classes.map((classInfo) => (
             <div
               key={classInfo.id}
-              className={`rounded-xl border p-4 ${classInfo.colorClasses}`}
+              className="rounded-xl border p-4"
+              style={{
+                backgroundColor: `${classInfo.colorClasses}1a`,
+                borderColor: classInfo.colorClasses,
+              }}
             >
               {editingClassId === classInfo.id ? (
                 <div className="flex gap-2">
