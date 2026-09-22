@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import AuthGuard from "./components/AuthGuard";
 import { HeadstartProvider } from "./context/HeadstartContext";
 
 const geistSans = Geist({
@@ -28,9 +29,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <HeadstartProvider>
           <Navbar />
-          {children}
+          <AuthGuard>
+            {children}
+          </AuthGuard>
         </HeadstartProvider>
-        </body>
+      </body>
     </html>
   );
 }

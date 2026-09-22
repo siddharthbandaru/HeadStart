@@ -192,9 +192,20 @@ function AssignmentPlanContent() {
       setSaving(true);
       setSaveError("");
 
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        setSaveError("You must be logged in to save an assignment.");
+        return;
+      }
+
       const { data, error } = await supabase
         .from("assignments")
         .insert({
+          user_id: user.id,
           title: assignment.title,
           course: assignment.course,
           class_id: assignment.classId,
