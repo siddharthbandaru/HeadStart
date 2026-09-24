@@ -36,6 +36,7 @@ type PendingAssignment = {
   directions: string;
   availableFrom: string;
   dueDate: string;
+  schedulingMode?: "standard" | "ai";
 };
 
 type EditableCheckpoint = {
@@ -80,7 +81,12 @@ function AssignmentPlanContent() {
       try {
         setLoading(true);
 
-        const response = await fetch("/api/generate-plan", {
+        const endpoint =
+          pendingAssignment.schedulingMode === "ai"
+            ? "/api/generate-ai-plan"
+            : "/api/generate-plan";
+
+        const response = await fetch(endpoint, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
