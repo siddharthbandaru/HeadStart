@@ -47,6 +47,8 @@ export default function NewAssignmentPage() {
   const [directions, setDirections] = useState("");
   const [availableFrom, setAvailableFrom] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [schedulingMode, setSchedulingMode] =
+    useState<"standard" | "ai">("standard");
 
   const [classId, setClassId] = useState<number>(0);
 
@@ -136,6 +138,7 @@ export default function NewAssignmentPage() {
       availableFrom:
         availableFrom || new Date().toISOString().split("T")[0],
       dueDate,
+      schedulingMode,
     };
 
     sessionStorage.setItem(
@@ -341,6 +344,47 @@ export default function NewAssignmentPage() {
               required
               className={inputStyle}
             />
+          </div>
+
+          {/* Scheduling Mode */}
+          <div>
+            <p className={labelStyle}>Scheduling Mode</p>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => setSchedulingMode("standard")}
+                className={`rounded-xl border p-4 text-left transition ${
+                  schedulingMode === "standard"
+                    ? "border-[#2573B8] bg-[#2573B8]/10"
+                    : "border-white/40 bg-white/20 hover:bg-white/30"
+                }`}
+              >
+                <p className="text-[19px] text-black">
+                  Standard
+                </p>
+                <p className="mt-1 text-[16px] text-gray-600">
+                  HeadStart&apos;s rule-based scheduling algorithm
+                </p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSchedulingMode("ai")}
+                className={`rounded-xl border p-4 text-left transition ${
+                  schedulingMode === "ai"
+                    ? "border-[#2573B8] bg-[#2573B8]/10"
+                    : "border-white/40 bg-white/20 hover:bg-white/30"
+                }`}
+              >
+                <p className="text-[19px] text-black">
+                  AI Optimized
+                </p>
+                <p className="mt-1 text-[16px] text-gray-600">
+                  AI analyzes your assignment to build a personalized plan
+                </p>
+              </button>
+            </div>
           </div>
 
           {/* Assignment File */}
