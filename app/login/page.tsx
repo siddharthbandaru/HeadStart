@@ -70,6 +70,15 @@ export default function LoginPage() {
             />
           </div>
 
+          <div className="text-right">
+            <a
+              href="/forgot-password"
+              className="text-sm underline"
+            >
+              Forgot password?
+            </a>
+          </div>
+
           {error && (
             <p className="text-red-500">{error}</p>
           )}

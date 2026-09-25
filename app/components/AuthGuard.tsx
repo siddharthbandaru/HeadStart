@@ -19,7 +19,12 @@ export default function AuthGuard({
         data: { user },
       } = await supabase.auth.getUser();
 
-      const publicRoutes = ["/login", "/signup"];
+      const publicRoutes = [
+        "/login",
+        "/signup",
+        "/forgot-password",
+        "/reset-password",
+      ];
 
       if (!user && !publicRoutes.includes(pathname)) {
         router.replace("/login");

@@ -7,6 +7,8 @@ import { supabase } from "@/lib/supabase";
 export default function SignupPage() {
   const router = useRouter();
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,6 +22,11 @@ export default function SignupPage() {
     setError("");
     setMessage("");
 
+    if (!firstName.trim() || !lastName.trim()) {
+      setError("Please enter your first and last name.");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -32,6 +39,10 @@ export default function SignupPage() {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
+        data: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+        },
       },
     });
 
@@ -47,7 +58,9 @@ export default function SignupPage() {
       return;
     }
 
-    setMessage("Account created! Check your email to confirm your account.");
+    setMessage(
+      "If this email is eligible for signup, we've sent a confirmation link. Already have an account? Log in instead."
+    );
   }
 
   return (
@@ -63,12 +76,37 @@ export default function SignupPage() {
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
+            <label className="block mb-1">First Name</label>
+            <input
+              type="text"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required
+              autoComplete="given-name"
+              className="w-full border rounded-lg p-3"
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1">Last Name</label>
+            <input
+              type="text"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required
+              autoComplete="family-name"
+              className="w-full border rounded-lg p-3"
+            />
+          </div>
+
+          <div>
             <label className="block mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoComplete="email"
               className="w-full border rounded-lg p-3"
             />
           </div>
@@ -81,6 +119,7 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
+              autoComplete="new-password"
               className="w-full border rounded-lg p-3"
             />
           </div>
@@ -93,6 +132,7 @@ export default function SignupPage() {
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
               minLength={6}
+              autoComplete="new-password"
               className="w-full border rounded-lg p-3"
             />
           </div>
@@ -104,7 +144,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black text-white rounded-lg p-3"
+            className="w-full bg-black text-white rounded-lg p-3 disabled:opacity-50"
           >
             {loading ? "Creating account..." : "Sign up"}
           </button>
