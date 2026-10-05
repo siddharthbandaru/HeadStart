@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# HeadStart
 
-## Getting Started
+HeadStart is a full-stack assignment planner that helps students break large assignments into smaller tasks and schedule them before the due date.
 
-First, run the development server:
+Instead of only keeping track of deadlines, HeadStart generates checkpoints based on an assignment's instructions, available dates, and the amount of time a student has to work each day.
+
+**Live Beta:** https://headstart-beta.vercel.app/login
+
+## Features
+
+- Create and manage classes
+- Add assignments with instructions and due dates
+- Generate assignment plans with AI
+- Break assignments into scheduled checkpoints
+- Track checkpoints through a to-do list
+- View assignments and checkpoints on a calendar
+- Mark tasks as complete
+- Customize class colors
+- Create an account and save your data
+- Password reset and account management
+
+## Tech Stack
+
+**Frontend**
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+**Backend**
+- Supabase
+- PostgreSQL
+- Next.js API routes
+
+**AI API**
+- Groq
+- Google Gemini
+- Custom fallback planning algorithm
+
+**Other**
+- Figma
+- Vercel
+- Git/GitHub
+
+## Planning System
+
+HeadStart has both AI and standard plan generation.
+
+For AI-generated plans, the planner first tries Groq and then Gemini. If neither provider is available, it falls back to the standard planning algorithm so users can still generate a plan.
+
+Generated plans are also checked against the assignment dates and the user's daily available work time before being returned.
+
+```text
+Assignment
+    ↓
+Planner
+    ↓
+Groq
+    ↓
+Gemini
+    ↓
+Standard Planner (fallback)
+    ↓
+Schedule Validation
+    ↓
+Checkpoints
+```
+
+## Running Locally
+
+Clone the repository:
+
+```bash
+git clone https://github.com/siddharthbandaru/HeadStart.git
+cd HeadStart
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env.local` file with the required environment variables:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SECRET_KEY=
+
+GROQ_API_KEY=
+GEMINI_API_KEY=
+```
+
+Then run:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The app will be available at `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Status
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+HeadStart is currently in beta. The main application is functional and deployed, and we're currently testing it with users and making improvements based on feedback.
 
-## Learn More
+Some things we're working on next:
 
-To learn more about Next.js, take a look at the following resources:
+- Responsive/mobile layouts
+- UI polish
+- Improvements to generated plans
+- More planning customization
+- Calendar improvements
+- Additional progress tracking
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Team
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built by Clara Anderson and Siddu Bandaru at UF!
