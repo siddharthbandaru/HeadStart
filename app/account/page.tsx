@@ -16,6 +16,15 @@ const itim = Itim({
   subsets: ["latin"],
 });
 
+const notebookBackground = {
+  backgroundColor: "#F0EEE9",
+  backgroundImage:
+    "repeating-linear-gradient(to bottom, transparent 0px, transparent 35px, #8db5c7a7 35px, #8db5c7a7 36px), linear-gradient(to right, transparent 115px, #E44B4B 115px, #E44B4B 116px, transparent 116px)",
+};
+
+const inputStyle =
+  "mt-2 w-full rounded-lg border border-white/50 bg-white/40 px-4 py-3 text-[18px] text-black outline-none transition placeholder:text-gray-400 focus:border-[#2573B8] focus:bg-white/60 focus:ring-2 focus:ring-[#2573B8]/20";
+
 export default function AccountPage() {
   const router = useRouter();
 
@@ -29,7 +38,8 @@ export default function AccountPage() {
   const [saveError, setSaveError] = useState("");
 
   // Delete account
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] =
+    useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState("");
 
@@ -42,8 +52,12 @@ export default function AccountPage() {
       setUser(user);
 
       if (user) {
-        setFirstName(user.user_metadata?.first_name ?? "");
-        setLastName(user.user_metadata?.last_name ?? "");
+        setFirstName(
+          user.user_metadata?.first_name ?? ""
+        );
+        setLastName(
+          user.user_metadata?.last_name ?? ""
+        );
       }
     };
 
@@ -61,12 +75,13 @@ export default function AccountPage() {
 
     setSaving(true);
 
-    const { data, error } = await supabase.auth.updateUser({
-      data: {
-        first_name: firstName.trim(),
-        last_name: lastName.trim(),
-      },
-    });
+    const { data, error } =
+      await supabase.auth.updateUser({
+        data: {
+          first_name: firstName.trim(),
+          last_name: lastName.trim(),
+        },
+      });
 
     setSaving(false);
 
@@ -76,8 +91,12 @@ export default function AccountPage() {
     }
 
     setUser(data.user);
-    setFirstName(data.user.user_metadata?.first_name ?? "");
-    setLastName(data.user.user_metadata?.last_name ?? "");
+    setFirstName(
+      data.user.user_metadata?.first_name ?? ""
+    );
+    setLastName(
+      data.user.user_metadata?.last_name ?? ""
+    );
 
     setSaveMessage("Profile updated!");
   };
@@ -137,151 +156,212 @@ export default function AccountPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F0EEE9] px-6 py-12">
+    <main
+      className={`min-h-screen px-6 py-12 ${itim.className}`}
+      style={notebookBackground}
+    >
       <div className="mx-auto max-w-2xl">
-        <h1
-          className={`${loveYaLikeASister.className} text-[48px] text-black`}
-        >
-          Account
-        </h1>
-
-        {/* Account information */}
-        <div className="mt-8 rounded-xl border border-white/40 bg-white/20 p-6 shadow-md backdrop-blur-[0.75px]">
-          <h2
-            className={`${loveYaLikeASister.className} mb-6 text-[32px] text-black`}
+        {/* Page heading */}
+        <div className="mb-8">
+          <h1
+            className={`${loveYaLikeASister.className} text-[44px] leading-tight text-black`}
           >
-            Profile
-          </h2>
+            Account
+          </h1>
+
+          <p className="mt-2 text-[19px] text-gray-600">
+            Manage your Head
+            <span className="text-[#2573B8]">
+              Start
+            </span>{" "}
+            profile.
+          </p>
+        </div>
+
+        {/* Profile */}
+        <section className="rounded-xl border border-white/40 bg-white/20 p-6 shadow-md backdrop-blur-[0.75px] sm:p-8">
+          <div className="mb-6">
+            <h2
+              className={`${loveYaLikeASister.className} text-[32px] leading-tight text-black`}
+            >
+              Your Profile
+            </h2>
+
+            <p className="mt-1 text-[17px] text-gray-600">
+              Update your personal information.
+            </p>
+          </div>
 
           {/* First name */}
           <div className="mb-5">
             <label
-              className={`${itim.className} block text-[20px] text-gray-500`}
+              htmlFor="first-name"
+              className="block text-[18px] text-gray-700"
             >
               First Name
             </label>
 
             <input
+              id="first-name"
               type="text"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) =>
+                setFirstName(e.target.value)
+              }
               placeholder="First name"
-              className={`${itim.className} mt-1 w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-[20px] text-black outline-none focus:border-[#2573B8]`}
+              autoComplete="given-name"
+              className={inputStyle}
             />
           </div>
 
           {/* Last name */}
           <div className="mb-5">
             <label
-              className={`${itim.className} block text-[20px] text-gray-500`}
+              htmlFor="last-name"
+              className="block text-[18px] text-gray-700"
             >
               Last Name
             </label>
 
             <input
+              id="last-name"
               type="text"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) =>
+                setLastName(e.target.value)
+              }
               placeholder="Last name"
-              className={`${itim.className} mt-1 w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-[20px] text-black outline-none focus:border-[#2573B8]`}
+              autoComplete="family-name"
+              className={inputStyle}
             />
           </div>
 
           {/* Email */}
-          <div className="mb-5">
-            <p
-              className={`${itim.className} text-[20px] text-gray-500`}
+          <div className="mb-6">
+            <label
+              htmlFor="account-email"
+              className="block text-[18px] text-gray-700"
             >
               Email
-            </p>
+            </label>
 
-            <p
-              className={`${itim.className} mt-1 text-[22px] text-black`}
-            >
-              {user?.email ?? "Loading..."}
+            <input
+              id="account-email"
+              type="email"
+              value={user?.email ?? ""}
+              readOnly
+              placeholder={
+                user ? "" : "Loading..."
+              }
+              className="mt-2 w-full cursor-not-allowed rounded-lg border border-white/40 bg-white/20 px-4 py-3 text-[18px] text-gray-500 outline-none"
+            />
+
+            <p className="mt-2 text-[14px] text-gray-500">
+              Your account email cannot be changed
+              here.
             </p>
           </div>
 
-          {/* Messages */}
+          {/* Error */}
           {saveError && (
-            <p
-              className={`${itim.className} mb-4 text-[17px] text-red-600`}
+            <div
+              role="alert"
+              className="mb-5 rounded-lg border border-red-300 bg-red-50/70 px-4 py-3 text-[16px] text-red-700"
             >
               {saveError}
-            </p>
+            </div>
           )}
 
+          {/* Success */}
           {saveMessage && (
-            <p
-              className={`${itim.className} mb-4 text-[17px] text-green-700`}
+            <div
+              role="status"
+              className="mb-5 rounded-lg border border-green-300 bg-green-50/70 px-4 py-3 text-[16px] text-green-700"
             >
               {saveMessage}
-            </p>
+            </div>
           )}
 
-          {/* Buttons */}
+          {/* Profile actions */}
           <div className="flex flex-wrap gap-3">
             <button
+              type="button"
               onClick={handleSaveProfile}
               disabled={saving}
-              className={`${itim.className} rounded-lg bg-[#2573B8] px-5 py-2 text-[20px] text-white transition hover:bg-[#1c609c] disabled:opacity-50`}
+              className="rounded-lg bg-[#2573B8] px-5 py-3 text-[18px] text-white shadow-sm transition hover:bg-[#1c609c] disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {saving ? "Saving..." : "Save Changes"}
+              {saving
+                ? "Saving..."
+                : "Save Changes"}
             </button>
 
             <button
+              type="button"
               onClick={handleLogout}
-              className={`${itim.className} rounded-lg border border-gray-300 bg-white px-5 py-2 text-[20px] text-gray-700 transition hover:bg-gray-100`}
+              className="rounded-lg border border-white/50 bg-white/30 px-5 py-3 text-[18px] text-gray-700 transition hover:bg-white/50"
             >
               Log Out
             </button>
           </div>
-        </div>
+        </section>
 
         {/* Danger Zone */}
-        <div className="mt-8 rounded-xl border border-red-300 bg-red-50 p-6 shadow-md">
+        <section className="mt-8 rounded-xl border border-red-300/70 bg-red-50/30 p-6 shadow-md backdrop-blur-[0.75px] sm:p-8">
           <h2
-            className={`${loveYaLikeASister.className} text-[32px] text-red-700`}
+            className={`${loveYaLikeASister.className} text-[30px] text-[#9c2133]`}
           >
             Danger Zone
           </h2>
 
-          <p
-            className={`${itim.className} mt-2 text-[18px] text-gray-700`}
-          >
-            Permanently delete your HeadStart account and all of your
-            saved data. This cannot be undone.
+          <p className="mt-2 max-w-xl text-[17px] leading-relaxed text-gray-600">
+            Permanently delete your HeadStart account
+            and all of your saved data. This action
+            cannot be undone.
           </p>
 
           {!showDeleteConfirm ? (
             <button
-              onClick={() => setShowDeleteConfirm(true)}
-              className={`${itim.className} mt-5 rounded-lg bg-red-600 px-5 py-2 text-[20px] text-white transition hover:bg-red-700`}
+              type="button"
+              onClick={() =>
+                setShowDeleteConfirm(true)
+              }
+              className="mt-5 rounded-lg border border-[#9c2133] bg-transparent px-5 py-2.5 text-[18px] text-[#9c2133] transition hover:bg-red-50"
             >
               Delete Account
             </button>
           ) : (
-            <div className="mt-5 rounded-lg border border-red-300 bg-white/60 p-4">
-              <p
-                className={`${itim.className} text-[18px] text-red-700`}
+            <div className="mt-5 rounded-xl border border-red-300/70 bg-white/30 p-5">
+              <h3
+                className={`${loveYaLikeASister.className} text-[24px] text-[#9c2133]`}
               >
-                Are you sure? Your account, classes, assignments, and
-                checkpoints will be permanently deleted.
+                Delete your account?
+              </h3>
+
+              <p className="mt-2 text-[17px] leading-relaxed text-gray-700">
+                Your account, classes, assignments,
+                and checkpoints will be permanently
+                deleted.
+              </p>
+
+              <p className="mt-2 text-[16px] font-medium text-[#9c2133]">
+                This cannot be undone.
               </p>
 
               {deleteError && (
-                <p
-                  className={`${itim.className} mt-3 text-[16px] text-red-600`}
+                <div
+                  role="alert"
+                  className="mt-4 rounded-lg border border-red-300 bg-red-50/70 px-4 py-3 text-[16px] text-red-700"
                 >
                   {deleteError}
-                </p>
+                </div>
               )}
 
-              <div className="mt-4 flex gap-3">
+              <div className="mt-5 flex flex-wrap gap-3">
                 <button
+                  type="button"
                   onClick={handleDeleteAccount}
                   disabled={deleting}
-                  className={`${itim.className} rounded-lg bg-red-600 px-5 py-2 text-[18px] text-white transition hover:bg-red-700 disabled:opacity-50`}
+                  className="rounded-lg bg-[#9c2133] px-5 py-2.5 text-[17px] text-white transition hover:bg-[#801a2a] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {deleting
                     ? "Deleting..."
@@ -289,19 +369,20 @@ export default function AccountPage() {
                 </button>
 
                 <button
+                  type="button"
                   onClick={() => {
                     setShowDeleteConfirm(false);
                     setDeleteError("");
                   }}
                   disabled={deleting}
-                  className={`${itim.className} rounded-lg border border-gray-300 bg-white px-5 py-2 text-[18px] text-gray-700 transition hover:bg-gray-100 disabled:opacity-50`}
+                  className="rounded-lg border border-white/50 bg-white/30 px-5 py-2.5 text-[17px] text-gray-700 transition hover:bg-white/50 disabled:opacity-50"
                 >
                   Cancel
                 </button>
               </div>
             </div>
           )}
-        </div>
+        </section>
       </div>
     </main>
   );
